@@ -21,6 +21,10 @@ kotlin {
     jvm()
     js {
         browser {
+            dceTask {
+                // configure DCE to prevent runtime errors in production webpack builds
+                keep("ktor-ktor-io.\$\$importsForInline\$\$.ktor-ktor-io.io.ktor.utils.io")
+            }
         }
         nodejs {
         }
@@ -29,7 +33,13 @@ kotlin {
     // For Linux, should be changed to e.g. linuxX64
     // For MacOS, should be changed to e.g. macosX64
     // For Windows, should be changed to e.g. mingwX64
-    linuxX64("linux")
+    linuxX64("linux") {
+        binaries {
+            sharedLib {
+                baseName = "obytekt"
+            }
+        }
+    }
 
     sourceSets {
         commonMain {
@@ -66,6 +76,13 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
                 implementation("io.ktor:ktor-client-logging-js:$ktor_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version")
+
+                // declare NPM dependencies to fix bugs with ktor client build
+                implementation(npm("text-encoding"))
+                implementation(npm("bufferutil"))
+                implementation(npm("utf-8-validate"))
+                implementation(npm("abort-controller"))
+                implementation(npm("fs"))
             }
         }
         val jsTest by getting {
