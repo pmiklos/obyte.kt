@@ -1,3 +1,3 @@
-rootProject.name = "obyte.kt"
+rootProject.name = "obytekt"
 
 enableFeaturePreview("GRADLE_METADATA")

@@ -6,6 +6,7 @@ val serialization_version: String by project
 plugins {
     kotlin("multiplatform") version "1.3.72"
     kotlin("plugin.serialization") version "1.3.72"
+    id("maven-publish")
 }
 
 repositories {
@@ -35,21 +36,19 @@ kotlin {
     // For Windows, should be changed to e.g. mingwX64
     linuxX64("linux") {
         binaries {
-            sharedLib {
-                baseName = "obytekt"
-            }
+            sharedLib()
         }
     }
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation(kotlin("stdlib-common"))
-                implementation("io.ktor:ktor-client-cio:$ktor_version")
+                api("io.ktor:ktor-client-cio:$ktor_version")
                 implementation("io.ktor:ktor-client-websockets:$ktor_version")
                 implementation("io.ktor:ktor-client-logging:$ktor_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version")
+                implementation(kotlin("stdlib-common"))
             }
         }
         commonTest {
