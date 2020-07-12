@@ -7,7 +7,7 @@ typealias MessageHandler <T> = suspend ObyteRequestContext.(T) -> Unit
 
 class ObyteSessionConfiguration {
 
-    internal lateinit var onConnectedFunction: suspend ObyteClientContext.() -> Unit
+    internal var onConnectedFunction: suspend ObyteClientContext.() -> Unit = {}
 
     private val listeners: MutableMap<KClass<out Message>, MutableList<MessageHandler<in Message>>> = mutableMapOf()
 
