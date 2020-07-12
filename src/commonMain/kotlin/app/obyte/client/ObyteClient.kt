@@ -24,7 +24,7 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonException
 
 fun ObyteClient(
-    block: HttpClientConfig<*>.() -> Unit
+    block: HttpClientConfig<*>.() -> Unit = {}
 ): HttpClient = HttpClient {
     install(WebSockets)
     install(Logging) {
