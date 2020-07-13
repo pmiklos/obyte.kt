@@ -21,4 +21,4 @@ fun main() = runBlocking {
 }
 ```
 
-See more examples in [obyte.kt-samples](../obyte.kt-samples)
+See more examples in [obyte.kt-samples](https://github.com/pmiklos/obyte.kt-samples)
