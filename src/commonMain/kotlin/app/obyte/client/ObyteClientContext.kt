@@ -1,8 +1,8 @@
 package app.obyte.client
 
 import app.obyte.client.protocol.Message
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.withTimeout
 
 
 interface ObyteClientContext {
@@ -19,18 +19,25 @@ class ObyteClientContextImpl internal constructor(
         obyteConnection.send(message)
     }
 
-    override suspend fun request(request: Message.Request): Message.Response? = withTimeout(30000L) {
+    override suspend fun request(request: Message.Request): Message.Response? {
         val subscription = responseChannel.openSubscription()
 
-        obyteConnection.send(request)
+        return try {
+            obyteConnection.send(request)
 
-        for (response in subscription) {
-            if (response.tag == request.tag) {
-                subscription.cancel()
-                return@withTimeout response
+            withTimeout(30000L) {
+                for (response in subscription) {
+                    if (response.tag == request.tag) {
+                        return@withTimeout response
+                    }
+                }
+                return@withTimeout null
             }
+        } catch (e: TimeoutCancellationException) {
+            return null
+        } finally {
+            subscription.cancel()
         }
-        return@withTimeout null
     }
 
 }
@@ -47,4 +54,4 @@ class ObyteRequestContext internal constructor(
 }
 
 suspend inline fun ObyteRequestContext.subscribe(tag: String) = respond(Message.Response.Subscribed(tag))
-suspend inline fun ObyteRequestContext.heartbeat() = request(Message.Request.Heartbeat()) as Message.Response.Heartbeat
+suspend inline fun ObyteRequestContext.heartbeat() = request(Message.Request.Heartbeat()) as? Message.Response.Heartbeat

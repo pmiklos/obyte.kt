@@ -50,8 +50,8 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 api("io.ktor:ktor-client-cio:$ktor_version")
+                api("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version")
                 implementation("io.ktor:ktor-client-logging-jvm:$ktor_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version")
                 implementation(kotlin("stdlib-jdk8"))
             }
         }
@@ -64,8 +64,8 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 api("io.ktor:ktor-client-js:$ktor_version")
+                api("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version")
                 implementation("io.ktor:ktor-client-logging-js:$ktor_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version")
                 implementation(kotlin("stdlib-js"))
 
                 // declare NPM dependencies to fix bugs with ktor client build
