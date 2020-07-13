@@ -2,6 +2,8 @@
 
 Obyte.kt is a multi-platform Kotlin library to communicate with hub nodes in the Obyte cryptocurrency network.
 
+This project is still in a very early alpha stage.
+
 Example usage:
 ```kotlin
 fun main() = runBlocking {
@@ -18,3 +20,5 @@ fun main() = runBlocking {
     }
 }
 ```
+
+See more examples in [obyte.kt-samples](../obyte.kt-samples)
