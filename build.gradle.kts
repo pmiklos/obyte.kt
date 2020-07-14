@@ -14,9 +14,7 @@ repositories {
     mavenCentral()
 }
 group = "app.obyte.client"
-version = "0.0.1"
-
-//apply plugin: "maven-publish"
+version = "0.1.0"
 
 kotlin {
     jvm()
