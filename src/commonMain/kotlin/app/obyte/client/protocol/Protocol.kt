@@ -3,6 +3,7 @@ package app.obyte.client.protocol
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -206,13 +207,13 @@ sealed class Message {
         @SerialName("light/get_definition")
         data class GetDefinition(
             // TODO map definition out to individual types
-            val definition: JsonArray,
+            val definition: JsonArray?,
             override var tag: String = ""
         ): Response() {
             @Serializer(forClass = GetDefinition::class)
             companion object: KSerializer<GetDefinition> {
                 override fun deserialize(decoder: Decoder): GetDefinition {
-                    val definition = decoder.decodeSerializableValue(JsonArray.serializer())
+                    val definition = decoder.decodeNullableSerializableValue(JsonArray.serializer().nullable)
                     return GetDefinition(definition)
                 }
             }
