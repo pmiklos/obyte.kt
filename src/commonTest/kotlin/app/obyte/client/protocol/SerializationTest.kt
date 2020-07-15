@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SerilizationTest {
+class SerializationTest {
 
     private val json = Json(
         JsonConfiguration.Stable, context = obyteProtocol
@@ -55,4 +55,12 @@ class SerilizationTest {
         )
     }
 
+    @Test
+    fun serializesGetWitnessesRequest() {
+        assertEquals("""
+            ["request",{"command":"get_witnesses","params":{},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(MessageSerializer, Message.Request.GetWitnesses().apply { tag = "123" })
+        )
+    }
 }

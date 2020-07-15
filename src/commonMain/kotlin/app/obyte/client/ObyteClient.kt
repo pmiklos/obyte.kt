@@ -18,6 +18,7 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.close
 import io.ktor.http.cio.websocket.readText
 import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -106,19 +107,19 @@ suspend fun HttpClient.connect(
                                 close(CloseReason(CloseReason.Codes.NORMAL, "Old client version"))
                                 break@loop
                             }
-                            else -> obyteSessionConfiguration.emit(obyteRequestContext, message)
+                            else -> launch {
+                                obyteSessionConfiguration.emit(obyteRequestContext, message)
+                            }
                         }
                     } catch (e: JsonException) {
-                        logger.log("Cannot parse: $rawMsg")
-                        //e.printStackTrace()
+                        logger.log("ERROR: ${e.message}")
                     } catch (e: SerializationException) {
-                        logger.log("Cannot deserialize: $rawMsg")
-                        //e.printStackTrace()
+                        logger.log("ERROR: $rawMsg")
                     } catch (e: Exception) {
-                        //e.printStackTrace()
+                        logger.log("ERROR: ${e.message}")
                     }
                 }
-                else -> println("Unknown frame $frame")
+                else -> logger.log("WARN: Unknown frame $frame")
             }
         }
 
