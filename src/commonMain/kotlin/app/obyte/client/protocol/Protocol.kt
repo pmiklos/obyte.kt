@@ -4,6 +4,9 @@ import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.modules.SerializersModule
 import kotlin.random.Random
 
@@ -20,12 +23,14 @@ val obyteProtocol = SerializersModule {
         Message.Request.Heartbeat::class with Message.Request.Heartbeat.serializer()
         Message.Request.GetWitnesses::class with Message.Request.GetWitnesses.serializer()
         Message.Request.GetParentsAndLastBallAndWitnessesUnit::class with Message.Request.GetParentsAndLastBallAndWitnessesUnit.serializer()
+        Message.Request.GetDefinition::class with Message.Request.GetDefinition.serializer()
     }
     polymorphic(Message.Response::class) {
         Message.Response.Subscribed::class with Message.Response.Subscribed.serializer()
         Message.Response.Heartbeat::class with Message.Response.Heartbeat.serializer()
         Message.Response.GetWitnesses::class with Message.Response.GetWitnesses.serializer()
         Message.Response.GetParentsAndLastBallAndWitnessesUnit::class with Message.Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
+        Message.Response.GetDefinition::class with Message.Response.GetDefinition.serializer()
     }
 }
 
@@ -128,6 +133,18 @@ sealed class Message {
             val witnesses: List<String>
         ): Request()
 
+        @Serializable
+        @SerialName("light/get_definition")
+        data class GetDefinition(
+            val address: String
+        ): Request() {
+            @Serializer(forClass = GetDefinition::class)
+            companion object: KSerializer<GetDefinition> {
+                override fun serialize(encoder: Encoder, value: GetDefinition) {
+                    encoder.encodeString(value.address)
+                }
+            }
+        }
     }
 
     @Serializable(with = ResponseSerializer::class)
@@ -184,6 +201,24 @@ sealed class Message {
             val witnessListUnit: String,
             override var tag: String = ""
         ): Response()
+
+        @Serializable
+        @SerialName("light/get_definition")
+        data class GetDefinition(
+            // TODO map definition out to individual types
+            val definition: JsonArray,
+            override var tag: String = ""
+        ): Response() {
+            @Serializer(forClass = GetDefinition::class)
+            companion object: KSerializer<GetDefinition> {
+                override fun deserialize(decoder: Decoder): GetDefinition {
+                    val definition = decoder.decodeSerializableValue(JsonArray.serializer())
+                    return GetDefinition(definition)
+                }
+            }
+        }
+
     }
+
 
 }

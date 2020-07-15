@@ -1,7 +1,6 @@
 package app.obyte.client.protocol
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.json.*
 import kotlin.test.*
 
 class DeserializationTest {
@@ -126,4 +125,23 @@ class DeserializationTest {
         )
     }
 
+    @Test
+    fun deserializesGetDefinition() {
+        assertEquals(
+            Message.Response.GetDefinition(
+                tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=",
+                definition = JsonArray(listOf(
+                    JsonPrimitive("sig"),
+                    JsonObject(mapOf(
+                        "pubkey" to JsonPrimitive("Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr")
+                    ))
+                ))
+            ),
+            json.parse(
+                MessageSerializer, """
+                ["response",{"tag":"FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=","command":"light/get_definition","response":["sig",{"pubkey":"Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr"}]}]
+            """.trimIndent()
+            )
+        )
+    }
 }

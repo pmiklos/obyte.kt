@@ -9,3 +9,6 @@ suspend inline fun ObyteRequestContext.getWitnesses() =
 
 suspend inline fun ObyteRequestContext.getGetParentsAndLastBallAndWitnessesUnit(witnesses: List<String>) =
     request(Message.Request.GetParentsAndLastBallAndWitnessesUnit(witnesses)) as? Message.Response.GetParentsAndLastBallAndWitnessesUnit
+
+suspend inline fun ObyteRequestContext.getDefinition(address: String) =
+    request(Message.Request.GetDefinition(address)) as? Message.Response.GetDefinition
