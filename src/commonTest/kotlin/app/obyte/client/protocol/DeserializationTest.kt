@@ -126,7 +126,7 @@ class DeserializationTest {
     }
 
     @Test
-    fun deserializesGetDefinition() {
+    fun deserializesGetDefinitionResponse() {
         assertEquals(
             Message.Response.GetDefinition(
                 tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=",
@@ -144,4 +144,21 @@ class DeserializationTest {
             )
         )
     }
+
+
+    @Test
+    fun deserializesGetDefinitionNullResponse() {
+        assertEquals(
+            Message.Response.GetDefinition(
+                tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=",
+                definition = null
+            ),
+            json.parse(
+                MessageSerializer, """
+                ["response",{"tag":"FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=","command":"light/get_definition","response":null}]
+            """.trimIndent()
+            )
+        )
+    }
+
 }
