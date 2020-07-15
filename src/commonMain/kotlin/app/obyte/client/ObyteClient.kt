@@ -112,16 +112,14 @@ suspend fun HttpClient.connect(
                             }
                         }
                     } catch (e: JsonException) {
-                        logger.log("Cannot parse: $rawMsg")
-                        //e.printStackTrace()
+                        logger.log("ERROR: ${e.message}")
                     } catch (e: SerializationException) {
-                        logger.log("Cannot deserialize: $rawMsg")
-                        //e.printStackTrace()
+                        logger.log("ERROR: $rawMsg")
                     } catch (e: Exception) {
-                        //e.printStackTrace()
+                        logger.log("ERROR: ${e.message}")
                     }
                 }
-                else -> println("Unknown frame $frame")
+                else -> logger.log("WARN: Unknown frame $frame")
             }
         }
 
