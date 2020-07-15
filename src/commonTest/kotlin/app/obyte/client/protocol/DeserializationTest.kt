@@ -106,5 +106,24 @@ class DeserializationTest {
         )
     }
 
+    @Test
+    fun deserializes() {
+        assertEquals(
+            Message.Response.GetParentsAndLastBallAndWitnessesUnit(
+                tag = "14erii/WmtUdKTJipHn/dXkg68jMlvZ6ZgOjqk/YdIQ=",
+                timestamp = 1594791527,
+                parentUnits = listOf("O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI="),
+                lastStableMcBall = "yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4=",
+                lastStableMcBallUnit = "wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk=",
+                lastStableMcBallMci = 1415908,
+                witnessListUnit = "TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="
+            ),
+            json.parse(
+                MessageSerializer, """
+                    ["response",{"tag":"14erii/WmtUdKTJipHn/dXkg68jMlvZ6ZgOjqk/YdIQ=","command":"light/get_parents_and_last_ball_and_witness_list_unit","response":{"timestamp":1594791527,"parent_units":["O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI="],"last_stable_mc_ball":"yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4=","last_stable_mc_ball_unit":"wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk=","last_stable_mc_ball_mci":1415908,"witness_list_unit":"TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="}}]
+            """.trimIndent()
+            )
+        )
+    }
 
 }

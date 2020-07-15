@@ -63,4 +63,19 @@ class SerializationTest {
             json.stringify(MessageSerializer, Message.Request.GetWitnesses().apply { tag = "123" })
         )
     }
+
+    @Test
+    fun serializesGetParentsAndLastBallAndWitnessesUnit() {
+        assertEquals("""
+            ["request",{"command":"light/get_parents_and_last_ball_and_witness_list_unit","params":{"witnesses":["2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX","2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"]},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(MessageSerializer, Message.Request.GetParentsAndLastBallAndWitnessesUnit(
+                witnesses = listOf(
+                    "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
+                    "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
+                )
+            ).apply { tag = "123" })
+        )
+    }
+
 }

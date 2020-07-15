@@ -4,7 +4,6 @@ import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.modules.SerialModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlin.random.Random
 
@@ -20,11 +19,13 @@ val obyteProtocol = SerializersModule {
         Message.Request.Subscribe::class with Message.Request.Subscribe.serializer()
         Message.Request.Heartbeat::class with Message.Request.Heartbeat.serializer()
         Message.Request.GetWitnesses::class with Message.Request.GetWitnesses.serializer()
+        Message.Request.GetParentsAndLastBallAndWitnessesUnit::class with Message.Request.GetParentsAndLastBallAndWitnessesUnit.serializer()
     }
     polymorphic(Message.Response::class) {
         Message.Response.Subscribed::class with Message.Response.Subscribed.serializer()
         Message.Response.Heartbeat::class with Message.Response.Heartbeat.serializer()
         Message.Response.GetWitnesses::class with Message.Response.GetWitnesses.serializer()
+        Message.Response.GetParentsAndLastBallAndWitnessesUnit::class with Message.Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
     }
 }
 
@@ -121,6 +122,12 @@ sealed class Message {
         @SerialName("get_witnesses")
         class GetWitnesses: Request()
 
+        @Serializable
+        @SerialName("light/get_parents_and_last_ball_and_witness_list_unit")
+        data class GetParentsAndLastBallAndWitnessesUnit(
+            val witnesses: List<String>
+        ): Request()
+
     }
 
     @Serializable(with = ResponseSerializer::class)
@@ -161,6 +168,22 @@ sealed class Message {
             }
         }
 
+        @Serializable
+        @SerialName("light/get_parents_and_last_ball_and_witness_list_unit")
+        data class GetParentsAndLastBallAndWitnessesUnit(
+            val timestamp: Long,
+            @SerialName("parent_units")
+            val parentUnits: List<String>,
+            @SerialName("last_stable_mc_ball")
+            val lastStableMcBall: String,
+            @SerialName("last_stable_mc_ball_unit")
+            val lastStableMcBallUnit: String,
+            @SerialName("last_stable_mc_ball_mci")
+            val lastStableMcBallMci: Long,
+            @SerialName("witness_list_unit")
+            val witnessListUnit: String,
+            override var tag: String = ""
+        ): Response()
     }
 
 }
