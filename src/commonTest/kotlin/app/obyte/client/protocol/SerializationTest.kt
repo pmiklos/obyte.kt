@@ -55,4 +55,12 @@ class SerializationTest {
         )
     }
 
+    @Test
+    fun serializesGetWitnessesRequest() {
+        assertEquals("""
+            ["request",{"command":"get_witnesses","params":{},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(MessageSerializer, Message.Request.GetWitnesses().apply { tag = "123" })
+        )
+    }
 }

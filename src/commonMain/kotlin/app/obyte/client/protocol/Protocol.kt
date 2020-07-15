@@ -2,6 +2,7 @@ package app.obyte.client.protocol
 
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.modules.SerialModule
 import kotlinx.serialization.modules.SerializersModule
@@ -18,10 +19,12 @@ val obyteProtocol = SerializersModule {
     polymorphic(Message.Request::class) {
         Message.Request.Subscribe::class with Message.Request.Subscribe.serializer()
         Message.Request.Heartbeat::class with Message.Request.Heartbeat.serializer()
+        Message.Request.GetWitnesses::class with Message.Request.GetWitnesses.serializer()
     }
     polymorphic(Message.Response::class) {
         Message.Response.Subscribed::class with Message.Response.Subscribed.serializer()
         Message.Response.Heartbeat::class with Message.Response.Heartbeat.serializer()
+        Message.Response.GetWitnesses::class with Message.Response.GetWitnesses.serializer()
     }
 }
 
@@ -114,6 +117,10 @@ sealed class Message {
         @SerialName("heartbeat")
         class Heartbeat : Request()
 
+        @Serializable
+        @SerialName("get_witnesses")
+        class GetWitnesses: Request()
+
     }
 
     @Serializable(with = ResponseSerializer::class)
@@ -138,6 +145,22 @@ sealed class Message {
                 override fun deserialize(decoder: Decoder): Heartbeat = Heartbeat("")
             }
         }
+
+        @Serializable
+        @SerialName("get_witnesses")
+        data class GetWitnesses(
+            val witnesses: List<String>,
+            override var tag: String = ""
+        ): Response() {
+            @Serializer(forClass = GetWitnesses::class)
+            companion object: KSerializer<GetWitnesses> {
+                override fun deserialize(decoder: Decoder): GetWitnesses {
+                    val witnesses = decoder.decodeSerializableValue(String.serializer().list)
+                    return GetWitnesses(witnesses)
+                }
+            }
+        }
+
     }
 
 }
