@@ -12,3 +12,6 @@ suspend inline fun ObyteRequestContext.getGetParentsAndLastBallAndWitnessesUnit(
 
 suspend inline fun ObyteRequestContext.getDefinition(address: String) =
     request(Message.Request.GetDefinition(address)) as? Message.Response.GetDefinition
+
+suspend inline fun ObyteRequestContext.getDefinitionForAddress(address: String) =
+    request(Message.Request.GetDefinitionForAddress(address)) as? Message.Response.GetDefinitionForAddress

@@ -161,4 +161,25 @@ class DeserializationTest {
         )
     }
 
+    @Test
+    fun deserializesGetDefinitionForAddress() {
+        assertEquals(
+            Message.Response.GetDefinitionForAddress(
+                tag = "d3W6Q3I0SiLOsCdVYW0EP/BC6lqU0FdYq8nNMS3ZrgA=",
+                definitionChash = "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
+                definition = JsonArray(listOf(
+                    JsonPrimitive("sig"),
+                    JsonObject(mapOf(
+                        "pubkey" to JsonPrimitive("AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq")
+                    ))
+                )),
+                isStable = true
+            ),
+            json.parse(
+                MessageSerializer, """
+                ["response",{"tag":"d3W6Q3I0SiLOsCdVYW0EP/BC6lqU0FdYq8nNMS3ZrgA=","command":"light/get_definition_for_address","response":{"definition_chash":"2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX","definition":["sig",{"pubkey":"AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq"}],"is_stable":true}}]
+            """.trimIndent()
+            )
+        )
+    }
 }

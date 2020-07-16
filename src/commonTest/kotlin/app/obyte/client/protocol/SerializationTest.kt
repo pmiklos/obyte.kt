@@ -91,4 +91,17 @@ class SerializationTest {
         )
     }
 
+    @Test
+    fun serializesGetDefinitionForAddress() {
+        assertEquals("""
+            ["request",{"command":"light/get_definition_for_address","params":{"address":"2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(
+                MessageSerializer, Message.Request.GetDefinitionForAddress(
+                    address = "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
+                ).apply { tag = "123" }
+            )
+        )
+    }
+
 }

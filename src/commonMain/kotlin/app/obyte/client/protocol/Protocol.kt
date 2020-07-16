@@ -25,6 +25,7 @@ val obyteProtocol = SerializersModule {
         Message.Request.GetWitnesses::class with Message.Request.GetWitnesses.serializer()
         Message.Request.GetParentsAndLastBallAndWitnessesUnit::class with Message.Request.GetParentsAndLastBallAndWitnessesUnit.serializer()
         Message.Request.GetDefinition::class with Message.Request.GetDefinition.serializer()
+        Message.Request.GetDefinitionForAddress::class with Message.Request.GetDefinitionForAddress.serializer()
     }
     polymorphic(Message.Response::class) {
         Message.Response.Subscribed::class with Message.Response.Subscribed.serializer()
@@ -32,6 +33,7 @@ val obyteProtocol = SerializersModule {
         Message.Response.GetWitnesses::class with Message.Response.GetWitnesses.serializer()
         Message.Response.GetParentsAndLastBallAndWitnessesUnit::class with Message.Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
         Message.Response.GetDefinition::class with Message.Response.GetDefinition.serializer()
+        Message.Response.GetDefinitionForAddress::class with Message.Response.GetDefinitionForAddress.serializer()
     }
 }
 
@@ -146,6 +148,13 @@ sealed class Message {
                 }
             }
         }
+
+        @Serializable
+        @SerialName("light/get_definition_for_address")
+        data class GetDefinitionForAddress(
+            val address: String
+        ): Request()
+
     }
 
     @Serializable(with = ResponseSerializer::class)
@@ -218,6 +227,17 @@ sealed class Message {
                 }
             }
         }
+
+        @Serializable
+        @SerialName("light/get_definition_for_address")
+        data class GetDefinitionForAddress(
+            @SerialName("definition_chash")
+            val definitionChash: String,
+            val definition: JsonArray?,
+            @SerialName("is_stable")
+            val isStable: Boolean,
+            override var tag: String = ""
+        ): Response()
 
     }
 
