@@ -1,14 +1,11 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI-release
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Triggers the workflow on GitHub release
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  release:
+    types: [ created ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,7 +24,10 @@ jobs:
       with:
         path: .gradle
         key: gradle
-    
+
     # Runs a single command using the runners shell
     - name: Build project
       run: ./gradlew clean build
+
+    - name: Publish artifacts
+      run: ./gradlew -Pgpr.user=pmiklos -Pgpr.key=${{ secrets.GITHUB_TOKEN }} publish
