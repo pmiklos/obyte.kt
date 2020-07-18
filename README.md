@@ -8,7 +8,7 @@ Example usage:
 ```kotlin
 fun main() = runBlocking {
     ObyteClient().connect(ObyteTestHub) {
-        on<Message.Request.Subscribe> { request ->
+        on<Request.Subscribe> { request ->
             subscribe(request.tag)
             launch {
                 while (true) {

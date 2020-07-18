@@ -1,6 +1,6 @@
 package app.obyte.client
 
-import app.obyte.client.protocol.Message
+import app.obyte.client.protocol.ObyteMessage
 import kotlin.reflect.KClass
 
 typealias MessageHandler <T> = suspend ObyteRequestContext.(T) -> Unit
@@ -9,21 +9,21 @@ class ObyteSessionConfiguration {
 
     internal var onConnectedFunction: suspend ObyteClientContext.() -> Unit = {}
 
-    private val listeners: MutableMap<KClass<out Message>, MutableList<MessageHandler<in Message>>> = mutableMapOf()
+    private val listeners: MutableMap<KClass<out ObyteMessage>, MutableList<MessageHandler<in ObyteMessage>>> = mutableMapOf()
 
     fun onConnected(handler: suspend ObyteClientContext.() -> Unit) {
         onConnectedFunction = handler
     }
 
-    fun <T : Message> on(messageType: KClass<out T>, handler: MessageHandler<in T>) {
+    fun <T : ObyteMessage> on(messageType: KClass<out T>, handler: MessageHandler<in T>) {
         listeners[messageType] = listeners.getOrPut(messageType) {
             mutableListOf()
         }.apply {
-            add(handler as MessageHandler<in Message>)
+            add(handler as MessageHandler<in ObyteMessage>)
         }
     }
 
-    internal suspend fun emit(context: ObyteRequestContext, message: Message) {
+    internal suspend fun emit(context: ObyteRequestContext, message: ObyteMessage) {
         listeners[message::class]?.forEach { handler ->
             context.apply { handler(message) }
         }
@@ -31,5 +31,5 @@ class ObyteSessionConfiguration {
 
 }
 
-inline fun <reified T : Message> ObyteSessionConfiguration.on(noinline handler: MessageHandler<T>) =
+inline fun <reified T : ObyteMessage> ObyteSessionConfiguration.on(noinline handler: MessageHandler<T>) =
     on(T::class, handler)
