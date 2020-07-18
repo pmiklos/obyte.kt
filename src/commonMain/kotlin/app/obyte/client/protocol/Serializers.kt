@@ -8,7 +8,8 @@ import kotlinx.serialization.modules.plus
 
 val obyteJson = Json(
     JsonConfiguration.Stable.copy(
-        classDiscriminator = "app"
+        classDiscriminator = "app",
+        encodeDefaults = false
     ), context = protocolModule + messageModule
 )
 

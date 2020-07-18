@@ -12,7 +12,7 @@ class ApplicationSerializationTest {
     fun serializesPaymentMessage() {
         assertEquals(
             """
-            {"app":"payment","payload_location":"inline","payloadHash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
+            {"app":"payment","payload_location":"inline","payload_hash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
         """.trimIndent(),
             json.stringify(
                 PolymorphicSerializer(Message::class), Message.Payment(
@@ -62,7 +62,7 @@ class ApplicationSerializationTest {
             ),
             json.parse(
                 PolymorphicSerializer(Message::class), """
-            {"app":"payment","payload_location":"inline","payloadHash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
+            {"app":"payment","payload_location":"inline","payload_hash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
         """.trimIndent()
             )
         )

@@ -25,6 +25,7 @@ internal val protocolModule = SerializersModule {
         Request.GetDefinition::class with Request.GetDefinition.serializer()
         Request.GetDefinitionForAddress::class with Request.GetDefinitionForAddress.serializer()
         Request.PostJoint::class with Request.PostJoint.serializer()
+        Request.GetJoint::class with Request.GetJoint.serializer()
     }
     polymorphic(Response::class) {
         Response.Subscribed::class with Response.Subscribed.serializer()
@@ -34,6 +35,7 @@ internal val protocolModule = SerializersModule {
         Response.GetDefinition::class with Response.GetDefinition.serializer()
         Response.GetDefinitionForAddress::class with Response.GetDefinitionForAddress.serializer()
         Response.PostJoint::class with Response.PostJoint.serializer()
+        Response.GetJoint::class with Response.GetJoint.serializer()
     }
 }
 
@@ -168,6 +170,18 @@ sealed class Request : ObyteMessage(),
         val unit: ObyteUnit
     ) : Request()
 
+    @Serializable
+    @SerialName("get_joint")
+    data class GetJoint(
+        val unitHash: UnitHash
+    ): Request() {
+        @Serializer(forClass = GetJoint::class)
+        companion object: KSerializer<GetJoint> {
+            override fun serialize(encoder: Encoder, value: GetJoint) {
+                encoder.encodeSerializableValue(UnitHash.serializer(), value.unitHash)
+            }
+        }
+    }
 }
 
 @Serializable(with = ResponseSerializer::class)
@@ -267,5 +281,12 @@ sealed class Response : ObyteMessage(),
             }
         }
     }
+
+    @Serializable
+    @SerialName("get_joint")
+    data class GetJoint(
+        val joint: Joint,
+        override var tag: String = ""
+    ): Response()
 
 }

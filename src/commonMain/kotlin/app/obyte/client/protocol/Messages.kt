@@ -1,5 +1,6 @@
 package app.obyte.client.protocol
 
+import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -17,7 +18,8 @@ sealed class Message {
     @SerialName("payment")
     data class Payment(
         @SerialName("payload_location")
-        val payloadLocation: PayloadLocation = PayloadLocation.INLINE,
+        val payloadLocation: PayloadLocation,
+        @SerialName("payload_hash")
         val payloadHash: String,
         val payload: PaymentPayload
     ) : Message()
@@ -37,12 +39,30 @@ enum class PayloadLocation {
 }
 
 @Serializable
+enum class InputType {
+    @SerialName("transfer")
+    TRANSFER,
+
+    @SerialName("headers_commission")
+    HEADER_COMMISSION,
+
+    @SerialName("witnessing")
+    WITNESSING
+}
+
+// TODO this could be polymorphic based on type, but it's not always present
+@Serializable
 data class Input(
-    val unit: UnitHash,
+    val type: InputType? = null,
+    val unit: UnitHash? = null,
     @SerialName("message_index")
-    val messageIndex: Int,
+    val messageIndex: Int? = null,
     @SerialName("output_index")
-    val outputIndex: Int
+    val outputIndex: Int? = null,
+    @SerialName("from_main_chain_index")
+    val fromMainChainIndex: Long? = null,
+    @SerialName("to_main_chain_index")
+    val toMainChainIndex: Long? = null
 )
 
 @Serializable

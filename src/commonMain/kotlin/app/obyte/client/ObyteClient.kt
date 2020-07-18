@@ -109,7 +109,7 @@ suspend fun HttpClient.connect(
                     } catch (e: JsonException) {
                         logger.log("ERROR: ${e.message}")
                     } catch (e: SerializationException) {
-                        logger.log("ERROR: $rawMsg")
+                        logger.log("ERROR: ${e.message}")
                     } catch (e: Exception) {
                         logger.log("ERROR: ${e.message}")
                     }

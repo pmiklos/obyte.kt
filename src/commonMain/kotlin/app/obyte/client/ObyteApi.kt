@@ -3,6 +3,7 @@ package app.obyte.client
 import app.obyte.client.protocol.ObyteUnit
 import app.obyte.client.protocol.Request
 import app.obyte.client.protocol.Response
+import app.obyte.client.protocol.UnitHash
 
 suspend inline fun ObyteRequestContext.subscribe(tag: String) = respond(Response.Subscribed(tag))
 suspend inline fun ObyteRequestContext.heartbeat() = request(Request.Heartbeat()) as? Response.Heartbeat
@@ -20,3 +21,6 @@ suspend inline fun ObyteRequestContext.getDefinitionForAddress(address: String) 
 
 suspend inline fun ObyteClientContext.postJoint(unit: ObyteUnit) =
     request(Request.PostJoint(unit)) as? Response.PostJoint
+
+suspend inline fun ObyteClientContext.getJoint(unitHash: UnitHash) =
+    request(Request.GetJoint(unitHash)) as? Response.GetJoint

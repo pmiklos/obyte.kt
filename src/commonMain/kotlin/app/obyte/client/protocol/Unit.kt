@@ -24,7 +24,14 @@ data class ObyteUnit(
     val headerCommission: Long,
     @SerialName("payload_commission")
     val payloadCommission: Long,
+    @SerialName("main_chain_index")
+    val mainChainIndex: Long? = null,
     val unit: UnitHash
+)
+
+@Serializable
+data class Joint(
+    val unit: ObyteUnit
 )
 
 @Serializable
