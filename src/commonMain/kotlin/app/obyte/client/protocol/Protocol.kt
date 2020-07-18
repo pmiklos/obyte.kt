@@ -33,6 +33,7 @@ internal val protocolModule = SerializersModule {
         Response.GetParentsAndLastBallAndWitnessesUnit::class with Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
         Response.GetDefinition::class with Response.GetDefinition.serializer()
         Response.GetDefinitionForAddress::class with Response.GetDefinitionForAddress.serializer()
+        Response.PostJoint::class with Response.PostJoint.serializer()
     }
 }
 
@@ -251,5 +252,20 @@ sealed class Response : ObyteMessage(),
         val isStable: Boolean,
         override var tag: String = ""
     ) : Response()
+
+    @Serializable
+    @SerialName("post_joint")
+    data class PostJoint(
+        val response: String,
+        override var tag: String = ""
+    ): Response() {
+        @Serializer(forClass = PostJoint::class)
+        companion object: KSerializer<PostJoint> {
+            override fun deserialize(decoder: Decoder): PostJoint {
+                val response = decoder.decodeString()
+                return PostJoint(response)
+            }
+        }
+    }
 
 }

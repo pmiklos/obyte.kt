@@ -1,5 +1,6 @@
 package app.obyte.client
 
+import app.obyte.client.protocol.ObyteUnit
 import app.obyte.client.protocol.Request
 import app.obyte.client.protocol.Response
 
@@ -16,3 +17,6 @@ suspend inline fun ObyteRequestContext.getDefinition(address: String) =
 
 suspend inline fun ObyteRequestContext.getDefinitionForAddress(address: String) =
     request(Request.GetDefinitionForAddress(address)) as? Response.GetDefinitionForAddress
+
+suspend inline fun ObyteClientContext.postJoint(unit: ObyteUnit) =
+    request(Request.PostJoint(unit)) as? Response.PostJoint

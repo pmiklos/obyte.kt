@@ -180,4 +180,20 @@ class MessageDeserializationTest {
             )
         )
     }
+
+    @Test
+    fun deserializesPostJointResponse() {
+        assertEquals(
+            Response.PostJoint(
+                response = "accepted",
+                tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=","command":"post_joint","response":"accepted"}]
+            """.trimIndent()
+            )
+        )
+
+    }
 }
