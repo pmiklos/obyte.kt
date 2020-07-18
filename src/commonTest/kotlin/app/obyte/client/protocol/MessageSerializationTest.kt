@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SerializationTest {
+class MessageSerializationTest {
 
     private val json = Json(
         JsonConfiguration.Stable, context = obyteProtocol

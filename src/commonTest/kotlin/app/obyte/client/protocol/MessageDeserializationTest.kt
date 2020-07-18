@@ -3,7 +3,7 @@ package app.obyte.client.protocol
 import kotlinx.serialization.json.*
 import kotlin.test.*
 
-class DeserializationTest {
+class MessageDeserializationTest {
 
     private val json = Json(
         JsonConfiguration.Stable, context = obyteProtocol
