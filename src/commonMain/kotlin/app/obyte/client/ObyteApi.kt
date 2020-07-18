@@ -1,9 +1,6 @@
 package app.obyte.client
 
-import app.obyte.client.protocol.ObyteUnit
-import app.obyte.client.protocol.Request
-import app.obyte.client.protocol.Response
-import app.obyte.client.protocol.UnitHash
+import app.obyte.client.protocol.*
 
 suspend inline fun ObyteRequestContext.subscribe(tag: String) = respond(Response.Subscribed(tag))
 suspend inline fun ObyteRequestContext.heartbeat() = request(Request.Heartbeat()) as? Response.Heartbeat

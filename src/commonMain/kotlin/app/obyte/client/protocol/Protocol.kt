@@ -26,6 +26,7 @@ internal val protocolModule = SerializersModule {
         Request.GetDefinitionForAddress::class with Request.GetDefinitionForAddress.serializer()
         Request.PostJoint::class with Request.PostJoint.serializer()
         Request.GetJoint::class with Request.GetJoint.serializer()
+        Request.PickDivisibleCoinsForAmount::class with Request.PickDivisibleCoinsForAmount.serializer()
     }
     polymorphic(Response::class) {
         Response.Subscribed::class with Response.Subscribed.serializer()
@@ -36,6 +37,7 @@ internal val protocolModule = SerializersModule {
         Response.GetDefinitionForAddress::class with Response.GetDefinitionForAddress.serializer()
         Response.PostJoint::class with Response.PostJoint.serializer()
         Response.GetJoint::class with Response.GetJoint.serializer()
+        Response.PickDivisibleCoinsForAmount::class with Response.PickDivisibleCoinsForAmount.serializer()
     }
 }
 
@@ -182,6 +184,18 @@ sealed class Request : ObyteMessage(),
             }
         }
     }
+
+    @Serializable
+    @SerialName("light/pick_divisible_coins_for_amount")
+    data class PickDivisibleCoinsForAmount(
+        val addresses: List<Address>,
+        @SerialName("last_ball_mci")
+        val lastBallMci: Long,
+        val amount: Long,
+        val asset: UnitHash? = null,
+        @SerialName("spend_unconfirmed")
+        val spendUnconfirmed: SpendUnconfirmed
+    ): Request()
 }
 
 @Serializable(with = ResponseSerializer::class)
@@ -289,4 +303,29 @@ sealed class Response : ObyteMessage(),
         override var tag: String = ""
     ): Response()
 
+    @Serializable
+    @SerialName("light/pick_divisible_coins_for_amount")
+    data class PickDivisibleCoinsForAmount(
+        @SerialName("inputs_with_proofs")
+        val inputsWithProof: List<InputWrapper>,
+        @SerialName("total_amount")
+        val totalAmount: Long,
+        override var tag: String = ""
+    ): Response()
+
 }
+
+@Serializable
+enum class SpendUnconfirmed {
+    @SerialName("all")
+    ALL,
+    @SerialName("own")
+    OWN,
+    @SerialName("none")
+    NONE
+}
+
+@Serializable
+data class InputWrapper(
+    val input: Input
+)

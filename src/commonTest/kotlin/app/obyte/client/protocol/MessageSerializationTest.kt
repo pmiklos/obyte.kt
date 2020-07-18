@@ -164,4 +164,20 @@ class MessageSerializationTest {
         )
     }
 
+    @Test
+    fun serializesPickDivisibleCoinsForAmount() {
+        assertEquals("""
+            ["request",{"command":"light/pick_divisible_coins_for_amount","params":{"addresses":["2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"],"last_ball_mci":99,"amount":100,"asset":"f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY=","spend_unconfirmed":"own"},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, Request.PickDivisibleCoinsForAmount(
+                    addresses = listOf(Address("2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7")),
+                    amount = 100,
+                    asset = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
+                    lastBallMci = 99,
+                    spendUnconfirmed = SpendUnconfirmed.OWN
+                ).apply { tag = "123" }
+            )
+        )
+    }
 }

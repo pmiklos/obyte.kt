@@ -104,7 +104,7 @@ class MessageDeserializationTest {
     }
 
     @Test
-    fun deserializes() {
+    fun deserializesGetParentsAndLastBallAndWitnessesUnit() {
         assertEquals(
             Response.GetParentsAndLastBallAndWitnessesUnit(
                 tag = "14erii/WmtUdKTJipHn/dXkg68jMlvZ6ZgOjqk/YdIQ=",
@@ -194,6 +194,36 @@ class MessageDeserializationTest {
             """.trimIndent()
             )
         )
+    }
 
+    @Test
+    fun deserializesPickDivisibleCoinsForAmountResponse() {
+        assertEquals(
+            Response.PickDivisibleCoinsForAmount(
+                inputsWithProof = listOf(
+                    InputWrapper(
+                        Input(
+                            unit = UnitHash("j80rqwBGAgWlg4MKDYLpc+qCfKmrFtZrsRNzvGvZY5E="),
+                            messageIndex = 0,
+                            outputIndex = 0
+                        )
+                    ),
+                    InputWrapper(
+                        Input(
+                            type = InputType.WITNESSING,
+                            fromMainChainIndex = 355095,
+                            toMainChainIndex = 355424
+                        )
+                    )
+                ),
+                totalAmount = 10418,
+                tag = "ZZDoW2n3W3FlcSl3+5ijQmC/dQujHmaxYiOHl27CP0M="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"ZZDoW2n3W3FlcSl3+5ijQmC/dQujHmaxYiOHl27CP0M=","command":"light/pick_divisible_coins_for_amount","response":{"inputs_with_proofs":[{"input":{"unit":"j80rqwBGAgWlg4MKDYLpc+qCfKmrFtZrsRNzvGvZY5E=","message_index":0,"output_index":0}},{"input":{"type":"witnessing","from_main_chain_index":355095,"to_main_chain_index":355424}}],"total_amount":10418}}]
+            """.trimIndent()
+            )
+        )
     }
 }

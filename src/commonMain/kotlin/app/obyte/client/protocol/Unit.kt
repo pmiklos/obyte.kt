@@ -31,7 +31,8 @@ data class ObyteUnit(
 
 @Serializable
 data class Joint(
-    val unit: ObyteUnit
+    val unit: ObyteUnit,
+    val ball: UnitHash? = null
 )
 
 @Serializable
