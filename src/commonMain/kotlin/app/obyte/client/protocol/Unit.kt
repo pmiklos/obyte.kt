@@ -9,8 +9,8 @@ import kotlinx.serialization.json.JsonArray
 data class ObyteUnit(
     val version: String,
     val alt: String,
-    val messages: List<Application>,
-    val authors: List<AuthorSpec>,
+    val messages: List<Message>,
+    val authors: List<Author>,
     @SerialName("parent_units")
     val parentUnits: List<UnitHash>,
     @SerialName("last_ball")
@@ -19,11 +19,16 @@ data class ObyteUnit(
     val lastBallUnit: UnitHash,
     @SerialName("witness_list_unit")
     val witnessListUnit: UnitHash,
-    val timestamp: Long
+    val timestamp: Long,
+    @SerialName("headers_commission")
+    val headerCommission: Long,
+    @SerialName("payload_commission")
+    val payloadCommission: Long,
+    val unit: UnitHash
 )
 
 @Serializable
-data class AuthorSpec(
+data class Author(
     val address: Address,
     val definition: JsonArray? = null,
     val authentifiers: Map<String, String> // TODO double check if String as value is ok in all cases

@@ -4,14 +4,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 
-val messageContext = SerializersModule {
-    polymorphic(Application::class) {
-        Application.Payment::class with Application.Payment.serializer()
+internal val messageModule = SerializersModule {
+    polymorphic(Message::class) {
+        Message.Payment::class with Message.Payment.serializer()
     }
 }
 
 @Serializable
-sealed class Application {
+sealed class Message {
 
     @Serializable
     @SerialName("payment")
@@ -20,7 +20,7 @@ sealed class Application {
         val payloadLocation: PayloadLocation = PayloadLocation.INLINE,
         val payloadHash: String,
         val payload: PaymentPayload
-    ) : Application()
+    ) : Message()
 
 }
 
@@ -37,7 +37,7 @@ enum class PayloadLocation {
 }
 
 @Serializable
-data class InputSpec(
+data class Input(
     val unit: UnitHash,
     @SerialName("message_index")
     val messageIndex: Int,
@@ -46,13 +46,13 @@ data class InputSpec(
 )
 
 @Serializable
-data class OutputSpec(
+data class Output(
     val address: Address,
     val amount: Long
 )
 
 @Serializable
 data class PaymentPayload(
-    val inputs: List<InputSpec>,
-    val outputs: List<OutputSpec>
+    val inputs: List<Input>,
+    val outputs: List<Output>
 )

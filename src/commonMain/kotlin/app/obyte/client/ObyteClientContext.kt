@@ -1,25 +1,27 @@
 package app.obyte.client
 
-import app.obyte.client.protocol.Message
+import app.obyte.client.protocol.JustSaying
+import app.obyte.client.protocol.Request
+import app.obyte.client.protocol.Response
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 
 
 interface ObyteClientContext {
-    suspend fun send(message: Message.JustSaying)
-    suspend fun request(request: Message.Request): Message.Response?
+    suspend fun send(message: JustSaying)
+    suspend fun request(request: Request): Response?
 }
 
 class ObyteClientContextImpl internal constructor(
     private val obyteConnection: ObyteConnection,
-    private val responseChannel: BroadcastChannel<Message.Response>
+    private val responseChannel: BroadcastChannel<Response>
 ) : ObyteClientContext {
 
-    override suspend fun send(message: Message.JustSaying) {
+    override suspend fun send(message: JustSaying) {
         obyteConnection.send(message)
     }
 
-    override suspend fun request(request: Message.Request): Message.Response? {
+    override suspend fun request(request: Request): Response? {
         val subscription = responseChannel.openSubscription()
 
         return try {
@@ -47,7 +49,7 @@ class ObyteRequestContext internal constructor(
     context: ObyteClientContext
 ) : ObyteClientContext by context {
 
-    suspend fun respond(message: Message.Response) {
+    suspend fun respond(message: Response) {
         obyteConnection.send(message)
     }
 

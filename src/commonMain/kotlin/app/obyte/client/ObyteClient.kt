@@ -1,8 +1,6 @@
 package app.obyte.client
 
-import app.obyte.client.protocol.Message
-import app.obyte.client.protocol.MessageSerializer
-import app.obyte.client.protocol.obyteProtocol
+import app.obyte.client.protocol.*
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.features.logging.DEFAULT
@@ -20,8 +18,6 @@ import io.ktor.http.cio.websocket.readText
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonException
 
 fun ObyteClient(
@@ -35,7 +31,7 @@ fun ObyteClient(
     apply(block)
 }
 
-val ObyteClientVersion = Message.JustSaying.Version(
+val ObyteClientVersion = JustSaying.Version(
     program = "Unknown",
     programVersion = "0.0.0",
     library = "ObyteKt",
@@ -73,12 +69,11 @@ suspend fun HttpClient.connect(
     request: HttpRequestBuilder.() -> Unit,
     block: ObyteSessionConfiguration.() -> Unit
 ) {
-    val json = Json(JsonConfiguration.Stable, context = obyteProtocol)
     val logger = Logger.DEFAULT
 
     wss(request) {
-        val responseChannel = BroadcastChannel<Message.Response>(100)
-        val obyteConnection = ObyteConnection(json, logger, this)
+        val responseChannel = BroadcastChannel<Response>(100)
+        val obyteConnection = ObyteConnection(obyteJson, logger, this)
         val obyteClientContext = ObyteClientContextImpl(obyteConnection, responseChannel)
         val obyteRequestContext = ObyteRequestContext(obyteConnection, obyteClientContext)
         val obyteSessionConfiguration = ObyteSessionConfiguration()
@@ -99,9 +94,9 @@ suspend fun HttpClient.connect(
                     logger.log("INCOMING: $rawMsg")
 
                     try {
-                        when (val message = json.parse(MessageSerializer, rawMsg)) {
-                            is Message.Response -> responseChannel.send(message)
-                            is Message.JustSaying.UpgradeRequired -> {
+                        when (val message = obyteJson.parse(ObyteMessageSerializer, rawMsg)) {
+                            is Response -> responseChannel.send(message)
+                            is JustSaying.UpgradeRequired -> {
                                 logger.log("Client library upgrade required")
                                 obyteSessionConfiguration.emit(obyteRequestContext, message)
                                 close(CloseReason(CloseReason.Codes.NORMAL, "Old client version"))
