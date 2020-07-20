@@ -48,7 +48,9 @@ data class ObyteUnitHeader(
 @Serializable
 data class Joint(
     val unit: ObyteUnit,
-    val ball: UnitHash? = null
+    val ball: UnitHash? = null,
+    @SerialName("skiplist_units")
+    val skipListUnits: List<UnitHash>? = null
 )
 
 @Serializable

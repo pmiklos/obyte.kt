@@ -3,7 +3,7 @@ package app.obyte.client.compose
 import app.obyte.client.protocol.*
 import io.ktor.util.date.GMTDate
 
-class Composer(
+class Composer internal constructor(
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
