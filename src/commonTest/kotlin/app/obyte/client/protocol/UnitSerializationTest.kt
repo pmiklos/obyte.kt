@@ -53,7 +53,7 @@ class UnitSerializationTest {
                     witnessListUnit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
                     timestamp = 12345678,
                     unit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
-                    headerCommission = 100,
+                    headersCommission = 100,
                     payloadCommission = 200
                 )
             )

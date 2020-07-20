@@ -1,4 +1,4 @@
-package app.obyte.client.protocol
+package app.obyte.client.util
 
 import java.util.*
 

@@ -1,4 +1,4 @@
-package app.obyte.client.protocol
+package app.obyte.client.util
 
 internal actual fun ByteArray.encodeBase64(): String {
     val buffer = js("Buffer").from(this)

@@ -69,7 +69,7 @@ class MessageSerializationTest {
                 witnesses = listOf(
                     "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
                     "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
-                )
+                ).map { Address(it) }
             ).apply { tag = "123" })
         )
     }
@@ -144,7 +144,7 @@ class MessageSerializationTest {
                     witnessListUnit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
                     timestamp = 12345678,
                     unit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
-                    headerCommission = 100,
+                    headersCommission = 100,
                     payloadCommission = 200
                 )
             ).apply { tag = "123" })

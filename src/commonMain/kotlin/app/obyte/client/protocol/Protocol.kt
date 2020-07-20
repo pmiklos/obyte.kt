@@ -1,5 +1,6 @@
 package app.obyte.client.protocol
 
+import app.obyte.client.util.encodeBase64
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
@@ -44,8 +45,6 @@ internal val protocolModule = SerializersModule {
 private val random = Random.Default
 
 private fun ByteArray.fillRandom(): ByteArray = apply { random.nextBytes(this) }
-
-internal expect fun ByteArray.encodeBase64(): String
 
 interface TaggedMessage {
     var tag: String
@@ -144,7 +143,7 @@ sealed class Request : ObyteMessage(),
     @Serializable
     @SerialName("light/get_parents_and_last_ball_and_witness_list_unit")
     data class GetParentsAndLastBallAndWitnessesUnit(
-        val witnesses: List<String>
+        val witnesses: List<Address>
     ) : Request()
 
     @Serializable
@@ -225,13 +224,13 @@ sealed class Response : ObyteMessage(),
     @Serializable
     @SerialName("get_witnesses")
     data class GetWitnesses(
-        val witnesses: List<String>,
+        val witnesses: List<Address>,
         override var tag: String = ""
     ) : Response() {
         @Serializer(forClass = GetWitnesses::class)
         companion object : KSerializer<GetWitnesses> {
             override fun deserialize(decoder: Decoder): GetWitnesses {
-                val witnesses = decoder.decodeSerializableValue(String.serializer().list)
+                val witnesses = decoder.decodeSerializableValue(Address.serializer().list)
                 return GetWitnesses(witnesses)
             }
         }
@@ -242,15 +241,15 @@ sealed class Response : ObyteMessage(),
     data class GetParentsAndLastBallAndWitnessesUnit(
         val timestamp: Long,
         @SerialName("parent_units")
-        val parentUnits: List<String>,
+        val parentUnits: List<UnitHash>,
         @SerialName("last_stable_mc_ball")
-        val lastStableMcBall: String,
+        val lastStableMcBall: UnitHash,
         @SerialName("last_stable_mc_ball_unit")
-        val lastStableMcBallUnit: String,
+        val lastStableMcBallUnit: UnitHash,
         @SerialName("last_stable_mc_ball_mci")
         val lastStableMcBallMci: Long,
         @SerialName("witness_list_unit")
-        val witnessListUnit: String,
+        val witnessListUnit: UnitHash,
         override var tag: String = ""
     ) : Response()
 

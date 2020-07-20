@@ -66,6 +66,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-logging-js:$ktor_version")
                 implementation(kotlin("stdlib-js"))
 
+                implementation(npm("create-hash"))
+
                 // declare NPM dependencies to fix bugs with ktor client build
                 implementation(npm("text-encoding"))
                 implementation(npm("bufferutil"))

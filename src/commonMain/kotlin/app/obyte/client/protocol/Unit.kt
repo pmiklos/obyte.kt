@@ -21,12 +21,28 @@ data class ObyteUnit(
     val witnessListUnit: UnitHash,
     val timestamp: Long,
     @SerialName("headers_commission")
-    val headerCommission: Long,
+    val headersCommission: Int,
     @SerialName("payload_commission")
-    val payloadCommission: Long,
+    val payloadCommission: Int,
     @SerialName("main_chain_index")
     val mainChainIndex: Long? = null,
     val unit: UnitHash
+)
+
+
+@Serializable
+@SerialName("unit")
+data class ObyteUnitHeader(
+    val version: String,
+    val alt: String,
+    val authors: List<Author>,
+    @SerialName("last_ball")
+    val lastBall: UnitHash,
+    @SerialName("last_ball_unit")
+    val lastBallUnit: UnitHash,
+    @SerialName("witness_list_unit")
+    val witnessListUnit: UnitHash,
+    val timestamp: Long
 )
 
 @Serializable

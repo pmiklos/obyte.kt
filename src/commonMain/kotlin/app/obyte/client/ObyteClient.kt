@@ -1,5 +1,7 @@
 package app.obyte.client
 
+import app.obyte.client.compose.CommissionStrategy
+import app.obyte.client.compose.Composer
 import app.obyte.client.protocol.*
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -72,12 +74,23 @@ suspend fun HttpClient.connect(
     val logger = Logger.DEFAULT
 
     wss(request) {
+        val commissionStrategy = CommissionStrategy()
+
         val responseChannel = BroadcastChannel<Response>(100)
-        val obyteConnection = ObyteConnection(obyteJson, logger, this)
-        val obyteClientContext = ObyteClientContextImpl(obyteConnection, responseChannel)
+        val obyteConnection = ObyteConnection(obyteJson, logger, this, responseChannel)
+
+        val remoteRepository = ObyteRemoteRepository(obyteConnection)
+
+        val composer = Composer(
+            configurationRepository = remoteRepository,
+            dagStateRepository = remoteRepository,
+            paymentRepository = remoteRepository,
+            commissionStrategy = commissionStrategy
+        )
+
+        val obyteClientContext = ObyteClientContextImpl(obyteConnection, composer)
         val obyteRequestContext = ObyteRequestContext(obyteConnection, obyteClientContext)
         val obyteSessionConfiguration = ObyteSessionConfiguration()
-
         obyteSessionConfiguration.apply(block)
 
         obyteClientContext.send(ObyteClientVersion)

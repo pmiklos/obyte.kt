@@ -1,6 +1,5 @@
 package app.obyte.client.protocol
 
-import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -44,7 +43,7 @@ enum class InputType {
     TRANSFER,
 
     @SerialName("headers_commission")
-    HEADER_COMMISSION,
+    HEADERS_COMMISSION,
 
     @SerialName("witnessing")
     WITNESSING

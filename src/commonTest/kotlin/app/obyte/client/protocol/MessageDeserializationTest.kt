@@ -93,7 +93,7 @@ class MessageDeserializationTest {
                     "PA4QK46276MJJD5DBOLIBMYKNNXMUVDP",
                     "RJDYXC4YQ4AZKFYTJVCR5GQJF5J6KPRI",
                     "WELOXP3EOA75JWNO6S5ZJHOO3EYFKPIR"
-                )
+                ).map { Address(it) }
             ),
             json.parse(
                 ObyteMessageSerializer, """
@@ -109,11 +109,11 @@ class MessageDeserializationTest {
             Response.GetParentsAndLastBallAndWitnessesUnit(
                 tag = "14erii/WmtUdKTJipHn/dXkg68jMlvZ6ZgOjqk/YdIQ=",
                 timestamp = 1594791527,
-                parentUnits = listOf("O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI="),
-                lastStableMcBall = "yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4=",
-                lastStableMcBallUnit = "wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk=",
+                parentUnits = listOf(UnitHash("O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI=")),
+                lastStableMcBall = UnitHash("yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4="),
+                lastStableMcBallUnit = UnitHash("wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk="),
                 lastStableMcBallMci = 1415908,
-                witnessListUnit = "TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="
+                witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato=")
             ),
             json.parse(
                 ObyteMessageSerializer, """
