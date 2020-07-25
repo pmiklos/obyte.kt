@@ -7,6 +7,10 @@ import org.bouncycastle.math.ec.FixedPointCombMultiplier
 import java.math.BigInteger
 
 
+/**
+ * @see <a href="https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/Sign.java">Ethereum Sign.java</a>
+ * @see <a href="https://github.com/bitcoinj/bitcoinj/blob/master/core/src/main/java/org/bitcoinj/core/ECKey.java">BitcoinJ ECKey</a>
+ */
 actual class PrivateKey actual constructor(actual val key: ByteArray) {
 
     companion object {
@@ -23,7 +27,6 @@ actual class PrivateKey actual constructor(actual val key: ByteArray) {
     actual fun toPublicKey(): PublicKey {
         var privKey = BigInteger(key)
 
-        println(privKey.bitLength())
         if (privKey.bitLength() > CURVE.n.bitLength()) {
             privKey = privKey.mod(CURVE.n)
         }
