@@ -6,4 +6,6 @@ interface DagStateRepository {
         witnesses: List<Address>
     ): Response.GetParentsAndLastBallAndWitnessesUnit
 
+    suspend fun getDefinitionForAddress(address: Address): Response.GetDefinitionForAddress
+
 }

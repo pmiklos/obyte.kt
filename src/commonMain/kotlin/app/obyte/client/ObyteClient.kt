@@ -2,6 +2,7 @@ package app.obyte.client
 
 import app.obyte.client.compose.CommissionStrategy
 import app.obyte.client.compose.Composer
+import app.obyte.client.compose.DefinitionHashAlgorithm
 import app.obyte.client.protocol.*
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -25,6 +26,7 @@ import kotlinx.serialization.json.JsonException
 fun ObyteClient(
     block: HttpClientConfig<*>.() -> Unit = {}
 ): HttpClient = HttpClient {
+    configurePlatform()
     install(WebSockets)
     install(Logging) {
         logger = Logger.DEFAULT
@@ -32,6 +34,8 @@ fun ObyteClient(
     }
     apply(block)
 }
+
+expect fun configurePlatform()
 
 val ObyteClientVersion = JustSaying.Version(
     program = "Unknown",
@@ -85,7 +89,8 @@ suspend fun HttpClient.connect(
             configurationRepository = remoteRepository,
             dagStateRepository = remoteRepository,
             paymentRepository = remoteRepository,
-            commissionStrategy = commissionStrategy
+            commissionStrategy = commissionStrategy,
+            definitionHashAlgorithm = DefinitionHashAlgorithm()
         )
 
         val obyteClientContext = ObyteClientContextImpl(obyteConnection, composer)

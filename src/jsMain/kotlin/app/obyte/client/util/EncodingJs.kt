@@ -1,6 +1,7 @@
 package app.obyte.client.util
 
-internal actual fun ByteArray.encodeBase64(): String {
-    val buffer = js("Buffer").from(this)
-    return buffer.toString("base64") as String
-}
+private val base32 = js("require('thirty-two')")
+
+internal actual fun ByteArray.encodeBase64(): String = Buffer.from(this).toString("base64")
+
+internal actual fun ByteArray.encodeBase32(): String = base32.encode(Buffer.from(this)).toString()

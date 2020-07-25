@@ -1,19 +1,40 @@
 package app.obyte.client.compose
 
+import app.obyte.client.ObyteException
 import app.obyte.client.protocol.*
+import app.obyte.client.util.PrivateKey
 import io.ktor.util.date.GMTDate
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.json
+import kotlinx.serialization.json.jsonArray
 
 class Composer internal constructor(
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
-    private val commissionStrategy: CommissionStrategy
+    private val commissionStrategy: CommissionStrategy,
+    private val definitionHashAlgorithm: DefinitionHashAlgorithm
 ) {
 
-    suspend fun transfer(from: Address, to: Address, amount: Long, asset: UnitHash? = null) {
+    suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null) {
         val witnesses = configurationRepository.getWitnesses()
 
+        val privateKey = PrivateKey(ByteArray(32)) // TODO read private key
+        val publicKey = privateKey.toPublicKey()
+        val addressDefinition = jsonArray {
+            +"sig"
+            +json {
+                "pubkey" to JsonPrimitive(publicKey.encodeBase64())
+            }
+        }
+        val from = Address(definitionHashAlgorithm.calculate(addressDefinition))
+
         val lightProps = dagStateRepository.getGetParentsAndLastBallAndWitnessesUnit(witnesses)
+        val storedDefinition = dagStateRepository.getDefinitionForAddress(from)
+
+        if (!storedDefinition.isStable) {
+            throw ObyteException("Definition or definition change for address $from is not stable yet")
+        }
 
         val targetAmount = amount + 700
         val coinsForAmount = paymentRepository.pickDivisibleCoinsForAmount(
@@ -28,8 +49,14 @@ class Composer internal constructor(
 
         val author = Author(
             address = from,
+            definition = if (storedDefinition.definition == null) {
+                addressDefinition
+            } else {
+                null
+            },
             authentifiers = mapOf("r" to "TODO") // TODO implement authentifiers
         )
+
         val payload = PaymentPayload(
             inputs = coinsForAmount.inputsWithProof.map { it.input },
             outputs = listOf(
@@ -58,17 +85,17 @@ class Composer internal constructor(
         val messages = listOf(payment)
 
         val unit = ObyteUnit(
-            version = "3.0t",
-            alt = "2",
+            version = header.version,
+            alt = header.alt,
+            authors = header.authors,
+            timestamp = header.timestamp,
+            lastBall = header.lastBall,
+            lastBallUnit = header.lastBallUnit,
+            witnessListUnit = header.witnessListUnit,
             payloadCommission = commissionStrategy.payloadCommission(messages),
             headersCommission = commissionStrategy.headersCommission(header),
-            timestamp = GMTDate().timestamp / 1000,
-            lastBall = lightProps.lastStableMcBall,
-            lastBallUnit = lightProps.lastStableMcBallUnit,
-            witnessListUnit = lightProps.witnessListUnit,
             parentUnits = lightProps.parentUnits,
             mainChainIndex = lightProps.lastStableMcBallMci,
-            authors = listOf(author),
             messages = messages,
             unit = UnitHash("TODO")
         )

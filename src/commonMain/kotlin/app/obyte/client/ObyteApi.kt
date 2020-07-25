@@ -13,7 +13,7 @@ suspend inline fun ObyteClientContext.getGetParentsAndLastBallAndWitnessesUnit(w
 suspend inline fun ObyteClientContext.getDefinition(address: String) =
     request(Request.GetDefinition(address)) as? Response.GetDefinition
 
-suspend inline fun ObyteClientContext.getDefinitionForAddress(address: String) =
+suspend inline fun ObyteClientContext.getDefinitionForAddress(address: Address) =
     request(Request.GetDefinitionForAddress(address)) as? Response.GetDefinitionForAddress
 
 suspend inline fun ObyteClientContext.postJoint(unit: ObyteUnit) =

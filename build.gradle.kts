@@ -51,6 +51,8 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version")
                 implementation("io.ktor:ktor-client-logging-jvm:$ktor_version")
                 implementation(kotlin("stdlib-jdk8"))
+                implementation("commons-codec:commons-codec:1.14")
+                implementation("org.bouncycastle:bcprov-jdk15on:1.66")
             }
         }
         val jvmTest by getting {
@@ -67,6 +69,8 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
 
                 implementation(npm("create-hash"))
+                implementation(npm("thirty-two"))
+                implementation(npm("secp256k1"))
 
                 // declare NPM dependencies to fix bugs with ktor client build
                 implementation(npm("text-encoding"))

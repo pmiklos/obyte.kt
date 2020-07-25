@@ -162,7 +162,7 @@ sealed class Request : ObyteMessage(),
     @Serializable
     @SerialName("light/get_definition_for_address")
     data class GetDefinitionForAddress(
-        val address: String
+        val address: Address
     ) : Request()
 
     @Serializable

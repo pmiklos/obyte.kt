@@ -94,7 +94,7 @@ class MessageSerializationTest {
         """.trimIndent(),
             json.stringify(
                 ObyteMessageSerializer, Request.GetDefinitionForAddress(
-                    address = "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
+                    address = Address("2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7")
                 ).apply { tag = "123" }
             )
         )

@@ -18,6 +18,11 @@ internal class ObyteRemoteRepository(private val connection: ObyteConnection) :
         return response ?: throw ObyteException("Failed to fetch latest state of the DAG")
     }
 
+    override suspend fun getDefinitionForAddress(address: Address): Response.GetDefinitionForAddress {
+        val response = connection.request(Request.GetDefinitionForAddress(address)) as? Response.GetDefinitionForAddress
+        return response ?: throw ObyteException("Failed to fetch address definition")
+    }
+
     override suspend fun pickDivisibleCoinsForAmount(request: Request.PickDivisibleCoinsForAmount): Response.PickDivisibleCoinsForAmount {
         val response = connection.request(request) as? Response.PickDivisibleCoinsForAmount
         return response ?: throw ObyteException("Failed to pick divisible coins")
