@@ -1,5 +1,7 @@
 package app.obyte.client.protocol
 
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -133,7 +135,9 @@ class MessageSerializationTest {
                     authors = listOf(
                         Author(
                             address = Address("ABC123"),
-                            authentifiers = mapOf("r" to "3eQPIFiPVLRwBwEzxUR5th")
+                            authentifiers = json {
+                                "r" to JsonPrimitive("3eQPIFiPVLRwBwEzxUR5th")
+                            }
                         )
                     ),
                     parentUnits = listOf(

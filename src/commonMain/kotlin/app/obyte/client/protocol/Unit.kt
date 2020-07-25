@@ -3,6 +3,7 @@ package app.obyte.client.protocol
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 @SerialName("unit")
@@ -57,7 +58,7 @@ data class Joint(
 data class Author(
     val address: Address,
     val definition: JsonArray? = null,
-    val authentifiers: Map<String, String> // TODO double check if String as value is ok in all cases
+    val authentifiers: JsonObject? = null
 )
 
 

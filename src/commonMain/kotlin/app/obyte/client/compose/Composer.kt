@@ -43,8 +43,7 @@ class Composer internal constructor(
                 wallet.addressDefinition
             } else {
                 null
-            },
-            authentifiers = mapOf("r" to "TODO") // TODO implement authentifiers
+            }
         )
 
         val payload = PaymentPayload(

@@ -1,6 +1,9 @@
 package app.obyte.client.compose
 
 import app.obyte.client.protocol.*
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -49,7 +52,9 @@ class CommissionStrategyTest {
             alt = "2",
             authors = listOf(Author(
                 address = Address("O4K4QILG6VPGTYLRAI2RGYRFJZ7N2Q2O"),
-                authentifiers = mapOf("r" to "8jerSGskJS6Z0RfyMrYizkvAbdfmAz2isgwAGLckBGdGiMLzWQc2Ggk83sggHQOBo9k4S3w7oeuhaxu4n2c3Ug==")
+                authentifiers = json {
+                    "r" to JsonPrimitive("8jerSGskJS6Z0RfyMrYizkvAbdfmAz2isgwAGLckBGdGiMLzWQc2Ggk83sggHQOBo9k4S3w7oeuhaxu4n2c3Ug==")
+                }
             )),
             witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
             lastBall = UnitHash("Ra5HQcdAiVQiTcs6ad9qnj59FQw3+Jombr8+qm9kD38="),
