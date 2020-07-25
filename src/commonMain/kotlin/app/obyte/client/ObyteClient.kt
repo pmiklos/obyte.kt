@@ -3,6 +3,7 @@ package app.obyte.client
 import app.obyte.client.compose.CommissionStrategy
 import app.obyte.client.compose.Composer
 import app.obyte.client.compose.DefinitionHashAlgorithm
+import app.obyte.client.compose.Wallet
 import app.obyte.client.protocol.*
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -86,11 +87,11 @@ suspend fun HttpClient.connect(
         val remoteRepository = ObyteRemoteRepository(obyteConnection)
 
         val composer = Composer(
+            wallet = Wallet.random(),
             configurationRepository = remoteRepository,
             dagStateRepository = remoteRepository,
             paymentRepository = remoteRepository,
-            commissionStrategy = commissionStrategy,
-            definitionHashAlgorithm = DefinitionHashAlgorithm()
+            commissionStrategy = commissionStrategy
         )
 
         val obyteClientContext = ObyteClientContextImpl(obyteConnection, composer)

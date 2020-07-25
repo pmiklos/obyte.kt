@@ -9,26 +9,16 @@ import kotlinx.serialization.json.json
 import kotlinx.serialization.json.jsonArray
 
 class Composer internal constructor(
+    private val wallet: Wallet,
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
-    private val commissionStrategy: CommissionStrategy,
-    private val definitionHashAlgorithm: DefinitionHashAlgorithm
+    private val commissionStrategy: CommissionStrategy
 ) {
 
-    suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null) {
+    suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
+        val from = wallet.address
         val witnesses = configurationRepository.getWitnesses()
-
-        val privateKey = PrivateKey(ByteArray(32)) // TODO read private key
-        val publicKey = privateKey.toPublicKey()
-        val addressDefinition = jsonArray {
-            +"sig"
-            +json {
-                "pubkey" to JsonPrimitive(publicKey.encodeBase64())
-            }
-        }
-        val from = Address(definitionHashAlgorithm.calculate(addressDefinition))
-
         val lightProps = dagStateRepository.getGetParentsAndLastBallAndWitnessesUnit(witnesses)
         val storedDefinition = dagStateRepository.getDefinitionForAddress(from)
 
@@ -50,7 +40,7 @@ class Composer internal constructor(
         val author = Author(
             address = from,
             definition = if (storedDefinition.definition == null) {
-                addressDefinition
+                wallet.addressDefinition
             } else {
                 null
             },
@@ -84,7 +74,7 @@ class Composer internal constructor(
 
         val messages = listOf(payment)
 
-        val unit = ObyteUnit(
+        return ObyteUnit(
             version = header.version,
             alt = header.alt,
             authors = header.authors,
