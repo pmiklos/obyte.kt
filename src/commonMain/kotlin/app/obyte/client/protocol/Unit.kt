@@ -28,7 +28,18 @@ data class ObyteUnit(
     @SerialName("main_chain_index")
     val mainChainIndex: Long? = null,
     val unit: UnitHash
-)
+) {
+    fun asHeader(): ObyteUnitHeader = ObyteUnitHeader(
+        version,
+        alt,
+        authors,
+        lastBall,
+        lastBallUnit,
+        witnessListUnit,
+        parentUnits,
+        timestamp
+    )
+}
 
 
 @Serializable

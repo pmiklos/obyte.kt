@@ -12,7 +12,8 @@ class Composer internal constructor(
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
     private val commissionStrategy: CommissionStrategy,
-    private val unitContentHashAlgorithm: UnitContentHashAlgorithm
+    private val unitContentHashAlgorithm: UnitContentHashAlgorithm,
+    private val unitHashAlgorithm: UnitHashAlgorithm
 ) {
 
     suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
@@ -73,15 +74,15 @@ class Composer internal constructor(
 
         val messages = listOf(payment)
 
-        val contentHash = unitContentHashAlgorithm.calculate(header, messages)
-        val signature = wallet.sign(contentHash)
+        val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
+        val signature = wallet.sign(contentHashToSign)
         val signedAuthor = author.copy(
             authentifiers = json {
                 "r" to signature.encodeBase64()
             }
         )
 
-        return ObyteUnit(
+        val unit = ObyteUnit(
             version = header.version,
             alt = header.alt,
             authors = listOf(signedAuthor),
@@ -94,8 +95,11 @@ class Composer internal constructor(
             headersCommission = commissionStrategy.headersCommission(header),
             mainChainIndex = lightProps.lastStableMcBallMci,
             messages = messages,
-            unit = UnitHash("TODO")
+            unit = unitHashPlaceholder
         )
 
+        return unit.copy(
+            unit = unitHashAlgorithm.calculate(unit)
+        )
     }
 }

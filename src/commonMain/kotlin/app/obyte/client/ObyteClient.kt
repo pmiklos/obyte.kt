@@ -83,13 +83,15 @@ suspend fun HttpClient.connect(
 
         val remoteRepository = ObyteRemoteRepository(obyteConnection)
 
+        val unitContentHashAlgorithm = UnitContentHashAlgorithm(obyteJson)
         val composer = Composer(
             wallet = Wallet.random(),
             configurationRepository = remoteRepository,
             dagStateRepository = remoteRepository,
             paymentRepository = remoteRepository,
             commissionStrategy = commissionStrategy,
-            unitContentHashAlgorithm = UnitContentHashAlgorithm(obyteJson)
+            unitContentHashAlgorithm = unitContentHashAlgorithm,
+            unitHashAlgorithm = UnitHashAlgorithm(obyteJson, unitContentHashAlgorithm)
         )
 
         val obyteClientContext = ObyteClientContextImpl(obyteConnection, composer)
