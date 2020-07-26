@@ -26,3 +26,5 @@ data class UnitHash(val value: String) {
         override fun deserialize(decoder: Decoder) = UnitHash(decoder.decodeString())
     }
 }
+
+internal val unitHashPlaceholder = UnitHash("placeholderplaceholderplaceholderplaceholder")

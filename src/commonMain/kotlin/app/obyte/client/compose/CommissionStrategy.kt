@@ -6,17 +6,13 @@ import kotlinx.serialization.json.*
 
 class CommissionStrategy {
 
-    private val PARENT_UNITS_LENGTH = lengthOf(json {
-        "parent_units" to jsonArray {
-            +"placeholderplaceholderplaceholderplaceholder"
-            +"placeholderplaceholderplaceholderplaceholder"
-        }
-    })
+    private val placeholderParents = listOf(unitHashPlaceholder, unitHashPlaceholder)
 
     fun headersCommission(header: ObyteUnitHeader): Int {
-        val element = obyteJson.toJson(ObyteUnitHeader.serializer(), header)
-        val headerWithoutParentUnits = JsonObject(element.jsonObject.minus("parent_units"))
-        return lengthOf(headerWithoutParentUnits) + PARENT_UNITS_LENGTH
+        val element = obyteJson.toJson(ObyteUnitHeader.serializer(), header.copy(
+            parentUnits = placeholderParents
+        ))
+        return lengthOf(element)
     }
 
     fun payloadCommission(messages: List<Message>): Int {
