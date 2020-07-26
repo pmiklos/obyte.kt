@@ -9,7 +9,7 @@ import kotlin.random.Random
 
 class Wallet internal constructor(
     definitionHashAlgorithm: DefinitionHashAlgorithm,
-    privateKey: PrivateKey) {
+    private val privateKey: PrivateKey) {
 
     val publicKey = privateKey.toPublicKey()
     val addressDefinition = jsonArray {
@@ -30,5 +30,7 @@ class Wallet internal constructor(
         }
 
     }
+
+    fun sign(message: ByteArray): ByteArray = privateKey.sign(message)
 
 }

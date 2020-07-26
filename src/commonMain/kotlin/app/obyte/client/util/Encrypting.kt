@@ -6,6 +6,8 @@ expect class PrivateKey(key: ByteArray) {
 
     fun toPublicKey(): PublicKey
 
+    fun sign(message: ByteArray): ByteArray
+
 }
 
 class PublicKey(val key: ByteArray) {

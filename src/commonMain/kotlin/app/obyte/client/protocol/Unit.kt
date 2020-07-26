@@ -43,6 +43,8 @@ data class ObyteUnitHeader(
     val lastBallUnit: UnitHash,
     @SerialName("witness_list_unit")
     val witnessListUnit: UnitHash,
+    @SerialName("parent_units")
+    val parentUnits: List<UnitHash>,
     val timestamp: Long
 )
 

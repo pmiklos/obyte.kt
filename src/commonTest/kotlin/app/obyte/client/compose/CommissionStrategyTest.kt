@@ -59,6 +59,7 @@ class CommissionStrategyTest {
             witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
             lastBall = UnitHash("Ra5HQcdAiVQiTcs6ad9qnj59FQw3+Jombr8+qm9kD38="),
             lastBallUnit = UnitHash("9brvF48oXYp9F4r+B9lPBBeT6Zj0lzUggP3d6STbWnc="),
+            parentUnits = listOf(UnitHash("DQzRt3NI0IKPCL3iHrxbmGA5b63WcPEH9LaeDL0FS78=")),
             timestamp = 1595094504
         )
         assertEquals(452, CommissionStrategy().headersCommission(header))

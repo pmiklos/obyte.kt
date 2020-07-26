@@ -15,7 +15,8 @@ class CommissionStrategy {
 
     fun headersCommission(header: ObyteUnitHeader): Int {
         val element = obyteJson.toJson(ObyteUnitHeader.serializer(), header)
-        return lengthOf(element) + PARENT_UNITS_LENGTH
+        val headerWithoutParentUnits = JsonObject(element.jsonObject.minus("parent_units"))
+        return lengthOf(headerWithoutParentUnits) + PARENT_UNITS_LENGTH
     }
 
     fun payloadCommission(messages: List<Message>): Int {

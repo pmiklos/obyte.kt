@@ -2,18 +2,17 @@ package app.obyte.client.compose
 
 import app.obyte.client.ObyteException
 import app.obyte.client.protocol.*
-import app.obyte.client.util.PrivateKey
+import app.obyte.client.util.encodeBase64
 import io.ktor.util.date.GMTDate
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
-import kotlinx.serialization.json.jsonArray
 
 class Composer internal constructor(
     private val wallet: Wallet,
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
-    private val commissionStrategy: CommissionStrategy
+    private val commissionStrategy: CommissionStrategy,
+    private val unitContentHashAlgorithm: UnitContentHashAlgorithm
 ) {
 
     suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
@@ -68,22 +67,31 @@ class Composer internal constructor(
             timestamp = GMTDate().timestamp / 1000,
             lastBall = lightProps.lastStableMcBall,
             lastBallUnit = lightProps.lastStableMcBallUnit,
-            witnessListUnit = lightProps.witnessListUnit
+            witnessListUnit = lightProps.witnessListUnit,
+            parentUnits = lightProps.parentUnits
         )
 
         val messages = listOf(payment)
 
+        val contentHash = unitContentHashAlgorithm.calculate(header, messages)
+        val signature = wallet.sign(contentHash)
+        val signedAuthor = author.copy(
+            authentifiers = json {
+                "r" to signature.encodeBase64()
+            }
+        )
+
         return ObyteUnit(
             version = header.version,
             alt = header.alt,
-            authors = header.authors,
+            authors = listOf(signedAuthor),
             timestamp = header.timestamp,
             lastBall = header.lastBall,
             lastBallUnit = header.lastBallUnit,
             witnessListUnit = header.witnessListUnit,
+            parentUnits = header.parentUnits,
             payloadCommission = commissionStrategy.payloadCommission(messages),
             headersCommission = commissionStrategy.headersCommission(header),
-            parentUnits = lightProps.parentUnits,
             mainChainIndex = lightProps.lastStableMcBallMci,
             messages = messages,
             unit = UnitHash("TODO")
