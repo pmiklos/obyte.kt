@@ -18,7 +18,7 @@ class UnitHashAlgorithm(
 
         val strippedUnit = with(unit) {
             StrippedUnit(
-                contentHash = contentHash.sha256().encodeBase64(),
+                contentHash = contentHash.encodeBase64(),
                 version = version,
                 alt = alt,
                 authors = authors.map { author -> Author(author.address) },
