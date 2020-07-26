@@ -21,7 +21,7 @@ class Wallet internal constructor(
     val address = Address(definitionHashAlgorithm.calculate(addressDefinition))
 
     companion object {
-        private val random = Random(1)
+        private val random = Random(1) // TODO remove this eventually since it's not random, testing only
 
         fun random(): Wallet {
             val key = ByteArray(32)

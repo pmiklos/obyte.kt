@@ -274,7 +274,7 @@ sealed class Response : ObyteMessage(),
     data class GetDefinitionForAddress(
         @SerialName("definition_chash")
         val definitionChash: String,
-        val definition: JsonArray?,
+        val definition: JsonArray? = null,
         @SerialName("is_stable")
         val isStable: Boolean,
         override var tag: String = ""
