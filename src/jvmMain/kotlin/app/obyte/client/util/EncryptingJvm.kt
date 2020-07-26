@@ -61,7 +61,7 @@ actual class PrivateKey actual constructor(actual val key: ByteArray) {
     private fun BigInteger.toByteArray(size: Int): ByteArray {
         val signedBytes = this.toByteArray()
         val unsignedBytes = if (signedBytes[0] == 0.toByte()) {
-            signedBytes.sliceArray(1..signedBytes.size)
+            signedBytes.sliceArray(1 until signedBytes.size)
         } else {
             signedBytes
         }
