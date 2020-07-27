@@ -1,4 +1,6 @@
-package app.obyte.client.protocol
+package app.obyte.client.compose
+
+import app.obyte.client.protocol.Output
 
 object OutputSorter: Comparator<Output> {
     override fun compare(a: Output, b: Output): Int {

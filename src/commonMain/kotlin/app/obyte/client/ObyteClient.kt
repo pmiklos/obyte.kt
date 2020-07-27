@@ -40,7 +40,7 @@ val ObyteClientVersion = JustSaying.Version(
     programVersion = "0.0.0",
     library = "ObyteKt",
     libraryVersion = "0.3.12",
-    protocolVersion = "1.0t",
+    protocolVersion = "3.0t",
     alt = "2"
 )
 
