@@ -16,6 +16,10 @@ class Composer internal constructor(
     private val unitHashAlgorithm: UnitHashAlgorithm
 ) {
 
+    private val authentifierPlaceholder = json {
+        "r" to "placeholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholder"
+    }
+
     suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
         val from = wallet.address
         val witnesses = configurationRepository.getWitnesses()
@@ -46,15 +50,21 @@ class Composer internal constructor(
             }
         )
 
+        val feePayingOutput = Output(
+            address = from,
+            amount = coinsForAmount.totalAmount - amount
+        )
+
+        val paymentOutput = Output(
+            address = to,
+            amount = amount
+        )
+
         val payload = PaymentPayload(
             inputs = coinsForAmount.inputsWithProof.map { it.input },
-            outputs = listOf(
-                Output(
-                    address = to,
-                    amount = coinsForAmount.totalAmount - amount
-                )
-            )
+            outputs = listOf(feePayingOutput, paymentOutput).filter { it.amount != 0L }
         )
+
         val payment = Message.Payment(
             payloadLocation = PayloadLocation.INLINE,
             payload = payload,
@@ -72,7 +82,35 @@ class Composer internal constructor(
             parentUnits = lightProps.parentUnits
         )
 
-        val messages = listOf(payment)
+        val messagesPlaceholder = listOf(payment)
+
+        val headersCommission = commissionStrategy.headersCommission(
+            header.copy(
+                authors = listOf(
+                    author.copy(
+                        authentifiers = authentifierPlaceholder
+                    )
+                )
+            )
+        )
+
+        val payloadCommission = commissionStrategy.payloadCommission(messagesPlaceholder)
+
+        val finalPayload = payload.copy(
+            outputs = listOf(
+                feePayingOutput.copy(
+                    amount = feePayingOutput.amount - headersCommission - payloadCommission
+                ),
+                paymentOutput
+            ).sortedWith(OutputSorter)
+        )
+
+        val finalPayment = payment.copy(
+            payload = finalPayload,
+            payloadHash = finalPayload.hash()
+        )
+
+        val messages = listOf(finalPayment)
 
         val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
         val signature = wallet.sign(contentHashToSign)
@@ -91,17 +129,15 @@ class Composer internal constructor(
             lastBallUnit = header.lastBallUnit,
             witnessListUnit = header.witnessListUnit,
             parentUnits = header.parentUnits,
-            payloadCommission = 0,
-            headersCommission = 0,
+            headersCommission = headersCommission,
+            payloadCommission = payloadCommission,
             mainChainIndex = lightProps.lastStableMcBallMci,
             messages = messages,
             unit = unitHashPlaceholder
         )
 
         return unit.copy(
-            unit = unitHashAlgorithm.calculate(unit),
-            headersCommission = commissionStrategy.headersCommission(unit.asHeader()),
-            payloadCommission = commissionStrategy.payloadCommission(unit.messages)
+            unit = unitHashAlgorithm.calculate(unit)
         )
     }
 }
