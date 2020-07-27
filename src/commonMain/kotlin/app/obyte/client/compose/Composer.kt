@@ -91,15 +91,17 @@ class Composer internal constructor(
             lastBallUnit = header.lastBallUnit,
             witnessListUnit = header.witnessListUnit,
             parentUnits = header.parentUnits,
-            payloadCommission = commissionStrategy.payloadCommission(messages),
-            headersCommission = commissionStrategy.headersCommission(header),
+            payloadCommission = 0,
+            headersCommission = 0,
             mainChainIndex = lightProps.lastStableMcBallMci,
             messages = messages,
             unit = unitHashPlaceholder
         )
 
         return unit.copy(
-            unit = unitHashAlgorithm.calculate(unit)
+            unit = unitHashAlgorithm.calculate(unit),
+            headersCommission = commissionStrategy.headersCommission(unit.asHeader()),
+            payloadCommission = commissionStrategy.payloadCommission(unit.messages)
         )
     }
 }

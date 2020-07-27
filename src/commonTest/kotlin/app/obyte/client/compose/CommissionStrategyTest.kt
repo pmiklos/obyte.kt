@@ -4,6 +4,7 @@ import app.obyte.client.protocol.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.json
+import kotlinx.serialization.json.jsonArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -65,4 +66,30 @@ class CommissionStrategyTest {
         assertEquals(452, CommissionStrategy().headersCommission(header))
     }
 
+
+    @Test
+    fun calculatesHeadersCommission2() {
+        val header = ObyteUnitHeader(
+            version = "3.0t",
+            alt = "2",
+            authors = listOf(Author(
+                address = Address("U4HU6L6U46EVK3BAO3KA7EDQYAR6I77V"),
+                definition = jsonArray {
+                    +"sig"
+                    +json {
+                        "pubkey" to JsonPrimitive("Ag9QxMLvQEXSEIs/V6DmdGJ13HYr/rmmabVX9mCM23ym")
+                    }
+                },
+                authentifiers = json {
+                    "r" to JsonPrimitive("T7Jr/5JLCDdo/qsWeS7l2IxrKo5XX8px49jxWV7rYGYobEwD4ZHtsr7zFNWCCQrCCHBjzcaBMQbkY0yNL58eug==")
+                }
+            )),
+            witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
+            lastBall = UnitHash("ICJuK+UevPaiKHVyrc8LiDvdrLAB6q0daujqjP6+crc="),
+            lastBallUnit = UnitHash("wveKo5If5RD2WtWDAEjc11GlkVr2fXZFpFhy7FDY6B8="),
+            parentUnits = listOf(UnitHash("jMT//RkxINgQG4ArE05s65EIAk00jQK4t6cWIuiWMmY=")),
+            timestamp = 1595094504
+        )
+        assertEquals(515, CommissionStrategy().headersCommission(header))
+    }
 }
