@@ -280,4 +280,16 @@ class MessageDeserializationTest {
         )
     }
 
+    @Test
+    fun deserializesHaveUpdates() {
+        assertEquals(
+            JustSaying.HaveUpdates,
+            json.parse(
+                ObyteMessageSerializer, """
+                    ["justsaying",{"subject":"light/have_updates"}]
+            """.trimIndent()
+            )
+        )
+    }
+
 }

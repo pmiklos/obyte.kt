@@ -19,6 +19,7 @@ internal val protocolModule = SerializersModule {
         JustSaying.OldCore::class with EmptyBody("old core", JustSaying.OldCore)
         JustSaying.NewAddressToWatch::class with JustSaying.NewAddressToWatch.serializer()
         JustSaying.Info::class with JustSaying.Info.serializer()
+        JustSaying.HaveUpdates::class with EmptyBody("light/have_updates", JustSaying.HaveUpdates)
     }
     polymorphic(Request::class) {
         Request.Subscribe::class with Request.Subscribe.serializer()
@@ -134,6 +135,10 @@ sealed class JustSaying : ObyteMessage() {
             override fun deserialize(decoder: Decoder): Info = Info(decoder.decodeString())
         }
     }
+
+    @Serializable
+    @SerialName("light/have_updates")
+    object HaveUpdates: JustSaying()
 
     @Serializable
     @SerialName("upgrade_required")
