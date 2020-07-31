@@ -28,6 +28,7 @@ internal val protocolModule = SerializersModule {
         Request.PostJoint::class with Request.PostJoint.serializer()
         Request.GetJoint::class with Request.GetJoint.serializer()
         Request.PickDivisibleCoinsForAmount::class with Request.PickDivisibleCoinsForAmount.serializer()
+        Request.GetBalances::class with Request.GetBalances.serializer()
     }
     polymorphic(Response::class) {
         Response.Subscribed::class with Response.Subscribed.serializer()
@@ -39,6 +40,7 @@ internal val protocolModule = SerializersModule {
         Response.PostJoint::class with Response.PostJoint.serializer()
         Response.GetJoint::class with Response.GetJoint.serializer()
         Response.PickDivisibleCoinsForAmount::class with Response.PickDivisibleCoinsForAmount.serializer()
+        Response.GetBalances::class with Response.GetBalances.serializer()
     }
 }
 
@@ -195,6 +197,19 @@ sealed class Request : ObyteMessage(),
         @SerialName("spend_unconfirmed")
         val spendUnconfirmed: SpendUnconfirmed
     ): Request()
+
+    @Serializable
+    @SerialName("light/get_balances")
+    data class GetBalances(
+        val addresses: List<Address>
+    ): Request() {
+        @Serializer(forClass = GetBalances::class)
+        companion object: KSerializer<GetBalances> {
+            override fun serialize(encoder: Encoder, value: GetBalances) {
+                encoder.encodeSerializableValue(Address.serializer().list, value.addresses)
+            }
+        }
+    }
 }
 
 @Serializable(with = ResponseSerializer::class)
@@ -312,6 +327,24 @@ sealed class Response : ObyteMessage(),
         override var tag: String = ""
     ): Response()
 
+    @Serializable
+    @SerialName("light/get_balances")
+    data class GetBalances(
+        val balances: Map<Address, Map<UnitHash, Balance>>,
+        override var tag: String = ""
+    ): Response() {
+        @Serializer(forClass = GetBalances::class)
+        companion object: KSerializer<GetBalances> {
+            override fun deserialize(decoder: Decoder): GetBalances {
+                val balances = decoder.decodeSerializableValue(
+                    MapSerializer(
+                        Address.serializer(),
+                        MapSerializer(UnitHash.serializer(), Balance.serializer())
+                    ))
+                return GetBalances(balances)
+            }
+        }
+    }
 }
 
 @Serializable
@@ -327,4 +360,14 @@ enum class SpendUnconfirmed {
 @Serializable
 data class InputWrapper(
     val input: Input
+)
+
+@Serializable
+data class Balance(
+    val stable: Long,
+    val pending: Long,
+    @SerialName("stable_outputs_count")
+    val stableOutputsCount: Int,
+    @SerialName("pending_outputs_count")
+    val pendingOutputsCount: Int
 )

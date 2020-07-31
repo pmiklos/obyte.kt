@@ -184,4 +184,20 @@ class MessageSerializationTest {
             )
         )
     }
+
+    @Test
+    fun serializesGetBalances() {
+        assertEquals("""
+            ["request",{"command":"light/get_balances","params":["LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"],"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, Request.GetBalances(
+                    addresses = listOf(
+                        Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55")
+                    )
+                ).apply { tag = "123" }
+            )
+        )
+    }
+
 }

@@ -21,3 +21,6 @@ suspend inline fun ObyteClientContext.postJoint(unit: ObyteUnit) =
 
 suspend inline fun ObyteClientContext.getJoint(unitHash: UnitHash) =
     request(Request.GetJoint(unitHash)) as? Response.GetJoint
+
+suspend inline fun ObyteClientContext.getBalances(addresses: List<Address>) =
+    request(Request.GetBalances(addresses)) as? Response.GetBalances

@@ -226,4 +226,44 @@ class MessageDeserializationTest {
             )
         )
     }
+
+    @Test
+    fun deserializesEmptyGetBalances() {
+        assertEquals(
+            Response.GetBalances(
+                balances = emptyMap(),
+                tag = "52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ=","command":"light/get_balances","response":{}}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesGetBalances() {
+        assertEquals(
+            Response.GetBalances(
+                balances = mapOf(
+                    Address("2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX") to mapOf(
+                        UnitHash("base") to Balance(
+                            stable = 123L,
+                            pending = 456L,
+                            stableOutputsCount = 1,
+                            pendingOutputsCount = 1
+                        )
+                    )
+                ),
+                tag = "52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ=","command":"light/get_balances","response":{"2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX":{"base":{"stable":123,"pending":456,"stable_outputs_count":1,"pending_outputs_count":1}}}}]
+            """.trimIndent()
+            )
+        )
+    }
+
 }

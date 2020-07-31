@@ -101,8 +101,10 @@ suspend fun HttpClient.connect(
 
         obyteClientContext.send(ObyteClientVersion)
 
-        with(obyteSessionConfiguration) {
-            obyteClientContext.apply { onConnectedFunction() }
+        launch {
+            with(obyteSessionConfiguration) {
+                obyteClientContext.apply { onConnectedFunction() }
+            }
         }
 
         loop@ for (frame in incoming) {
