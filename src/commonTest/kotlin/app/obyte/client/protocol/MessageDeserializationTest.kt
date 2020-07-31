@@ -128,12 +128,16 @@ class MessageDeserializationTest {
         assertEquals(
             Response.GetDefinition(
                 tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=",
-                definition = JsonArray(listOf(
-                    JsonPrimitive("sig"),
-                    JsonObject(mapOf(
-                        "pubkey" to JsonPrimitive("Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr")
-                    ))
-                ))
+                definition = JsonArray(
+                    listOf(
+                        JsonPrimitive("sig"),
+                        JsonObject(
+                            mapOf(
+                                "pubkey" to JsonPrimitive("Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr")
+                            )
+                        )
+                    )
+                )
             ),
             json.parse(
                 ObyteMessageSerializer, """
@@ -165,12 +169,16 @@ class MessageDeserializationTest {
             Response.GetDefinitionForAddress(
                 tag = "d3W6Q3I0SiLOsCdVYW0EP/BC6lqU0FdYq8nNMS3ZrgA=",
                 definitionChash = "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
-                definition = JsonArray(listOf(
-                    JsonPrimitive("sig"),
-                    JsonObject(mapOf(
-                        "pubkey" to JsonPrimitive("AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq")
-                    ))
-                )),
+                definition = JsonArray(
+                    listOf(
+                        JsonPrimitive("sig"),
+                        JsonObject(
+                            mapOf(
+                                "pubkey" to JsonPrimitive("AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq")
+                            )
+                        )
+                    )
+                ),
                 isStable = true
             ),
             json.parse(
@@ -287,6 +295,64 @@ class MessageDeserializationTest {
             json.parse(
                 ObyteMessageSerializer, """
                     ["justsaying",{"subject":"light/have_updates"}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesJoint() {
+        assertEquals(
+            JustSaying.Joint(
+                unit = ObyteUnit(
+                    version = "3.0t",
+                    alt = "2",
+                    messages = listOf(
+                        Message.Payment(
+                            payloadLocation = PayloadLocation.INLINE,
+                            payloadHash = "l8xtzcoXkbpIIT/bN3y71dfaCjhN9MaDJ3Bj6GyANU4=",
+                            payload = PaymentPayload(
+                                inputs = listOf(
+                                    Input(
+                                        unit = UnitHash("p95dgRRQfNs+HinvqcjASOL7zaPfj39e27Gu7PvMdek="),
+                                        messageIndex = 0,
+                                        outputIndex = 0
+                                    )
+                                ),
+                                outputs = listOf(
+                                    Output(
+                                        address = Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"),
+                                        amount = 1000
+                                    ),
+                                    Output(
+                                        address = Address("T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q"),
+                                        amount = 1474
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    authors = listOf(
+                        Author(
+                            address = Address("T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q"),
+                            authentifiers = json {
+                                "r" to JsonPrimitive("wScrUbfKHB3f0sQDwvy5TNnYeQPttDcM5v81w+6Gxko1b2bHC0S9FcYm7An/1YUb942AWGyklskSUccUROsNCw==")
+                            }
+                        )
+                    ),
+                    parentUnits = listOf(UnitHash("1GvR/CU6gt9U96yx+0Tg7WjG+3TJ6/OTxS5B9d072E4=")),
+                    lastBall = UnitHash("XCJMbQ5hkQG7eB82UIO3bA9YpRme/AVy3Y/6vRNhBro="),
+                    lastBallUnit = UnitHash("ktavor6h6GYlCavRAEd1OX7CKPood1OnvED0ZHal2F8="),
+                    timestamp = 1596215368,
+                    witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
+                    headersCommission = 452,
+                    payloadCommission = 311,
+                    unit = UnitHash("wYCq05xEIJLnR03/ivyhnL8IlOofiZCjsrlZkYvouU4=")
+                )
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                    ["justsaying",{"subject":"joint","body":{"unit":{"version":"3.0t","alt":"2","messages":[{"app":"payment","payload_location":"inline","payload_hash":"l8xtzcoXkbpIIT/bN3y71dfaCjhN9MaDJ3Bj6GyANU4=","payload":{"inputs":[{"unit":"p95dgRRQfNs+HinvqcjASOL7zaPfj39e27Gu7PvMdek=","message_index":0,"output_index":0}],"outputs":[{"address":"LMOELQTU4U5XBWPWJRXLO5P54MQLCF55","amount":1000},{"address":"T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q","amount":1474}]}}],"authors":[{"address":"T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q","authentifiers":{"r":"wScrUbfKHB3f0sQDwvy5TNnYeQPttDcM5v81w+6Gxko1b2bHC0S9FcYm7An/1YUb942AWGyklskSUccUROsNCw=="}}],"parent_units":["1GvR/CU6gt9U96yx+0Tg7WjG+3TJ6/OTxS5B9d072E4="],"last_ball":"XCJMbQ5hkQG7eB82UIO3bA9YpRme/AVy3Y/6vRNhBro=","last_ball_unit":"ktavor6h6GYlCavRAEd1OX7CKPood1OnvED0ZHal2F8=","timestamp":1596215368,"witness_list_unit":"TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato=","headers_commission":452,"payload_commission":311,"unit":"wYCq05xEIJLnR03/ivyhnL8IlOofiZCjsrlZkYvouU4="}}}]
             """.trimIndent()
             )
         )
