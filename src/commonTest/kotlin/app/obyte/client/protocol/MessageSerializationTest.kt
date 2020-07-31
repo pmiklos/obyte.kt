@@ -200,4 +200,17 @@ class MessageSerializationTest {
         )
     }
 
+    @Test
+    fun serializesNewAddressToWatch() {
+        assertEquals("""
+            ["justsaying",{"subject":"light/new_address_to_watch","body":"LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, JustSaying.NewAddressToWatch(
+                    address = Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55")
+                )
+            )
+        )
+    }
+
 }

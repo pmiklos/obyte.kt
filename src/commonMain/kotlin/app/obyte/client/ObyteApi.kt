@@ -24,3 +24,6 @@ suspend inline fun ObyteClientContext.getJoint(unitHash: UnitHash) =
 
 suspend inline fun ObyteClientContext.getBalances(addresses: List<Address>) =
     request(Request.GetBalances(addresses)) as? Response.GetBalances
+
+suspend inline fun ObyteClientContext.newAddressToWatch(address: Address) =
+    send(JustSaying.NewAddressToWatch(address))
