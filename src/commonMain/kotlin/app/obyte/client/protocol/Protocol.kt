@@ -18,6 +18,7 @@ internal val protocolModule = SerializersModule {
         JustSaying.UpgradeRequired::class with EmptyBody("upgrade_required", JustSaying.UpgradeRequired)
         JustSaying.OldCore::class with EmptyBody("old core", JustSaying.OldCore)
         JustSaying.NewAddressToWatch::class with JustSaying.NewAddressToWatch.serializer()
+        JustSaying.Info::class with JustSaying.Info.serializer()
     }
     polymorphic(Request::class) {
         Request.Subscribe::class with Request.Subscribe.serializer()
@@ -120,6 +121,17 @@ sealed class JustSaying : ObyteMessage() {
             override fun serialize(encoder: Encoder, value: NewAddressToWatch) {
                 encoder.encodeSerializableValue(Address.serializer(), value.address)
             }
+        }
+    }
+
+    @Serializable
+    @SerialName("info")
+    data class Info(
+        val message: String
+    ): JustSaying() {
+        @Serializer(forClass = Info::class)
+        companion object: KSerializer<Info> {
+            override fun deserialize(decoder: Decoder): Info = Info(decoder.decodeString())
         }
     }
 

@@ -266,4 +266,18 @@ class MessageDeserializationTest {
         )
     }
 
+    @Test
+    fun deserializesInfo() {
+        assertEquals(
+            JustSaying.Info(
+                message = "now watching LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["justsaying",{"subject":"info","body":"now watching LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"}]
+            """.trimIndent()
+            )
+        )
+    }
+
 }
