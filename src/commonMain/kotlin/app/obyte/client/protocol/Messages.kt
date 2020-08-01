@@ -72,6 +72,7 @@ data class Output(
 
 @Serializable
 data class PaymentPayload(
+    val asset: UnitHash? = null,
     val inputs: List<Input>,
     val outputs: List<Output>
 )

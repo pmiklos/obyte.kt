@@ -7,7 +7,6 @@ import io.ktor.util.date.GMTDate
 import kotlinx.serialization.json.json
 
 class Composer internal constructor(
-    private val wallet: Wallet,
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
     private val paymentRepository: PaymentRepository,
@@ -20,7 +19,7 @@ class Composer internal constructor(
         "r" to "placeholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholder"
     }
 
-    suspend fun transfer(to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
+    suspend fun transfer(wallet: Wallet, to: Address, amount: Long, asset: UnitHash? = null): ObyteUnit {
         val from = wallet.address
         val witnesses = configurationRepository.getWitnesses()
         val lightProps = dagStateRepository.getGetParentsAndLastBallAndWitnessesUnit(witnesses)

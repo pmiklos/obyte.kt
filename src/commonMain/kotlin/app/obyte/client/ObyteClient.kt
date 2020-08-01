@@ -1,7 +1,13 @@
 package app.obyte.client
 
-import app.obyte.client.compose.*
-import app.obyte.client.protocol.*
+import app.obyte.client.compose.CommissionStrategy
+import app.obyte.client.compose.Composer
+import app.obyte.client.compose.UnitContentHashAlgorithm
+import app.obyte.client.compose.UnitHashAlgorithm
+import app.obyte.client.protocol.JustSaying
+import app.obyte.client.protocol.ObyteMessageSerializer
+import app.obyte.client.protocol.Response
+import app.obyte.client.protocol.obyteJson
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.features.logging.DEFAULT
@@ -85,7 +91,6 @@ suspend fun HttpClient.connect(
 
         val unitContentHashAlgorithm = UnitContentHashAlgorithm(obyteJson)
         val composer = Composer(
-            wallet = Wallet.random(),
             configurationRepository = remoteRepository,
             dagStateRepository = remoteRepository,
             paymentRepository = remoteRepository,
