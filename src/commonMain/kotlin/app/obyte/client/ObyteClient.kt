@@ -1,6 +1,13 @@
 package app.obyte.client
 
-import app.obyte.client.protocol.*
+import app.obyte.client.compose.CommissionStrategy
+import app.obyte.client.compose.Composer
+import app.obyte.client.compose.UnitContentHashAlgorithm
+import app.obyte.client.compose.UnitHashAlgorithm
+import app.obyte.client.protocol.JustSaying
+import app.obyte.client.protocol.ObyteMessageSerializer
+import app.obyte.client.protocol.Response
+import app.obyte.client.protocol.obyteJson
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.features.logging.DEFAULT
@@ -23,6 +30,7 @@ import kotlinx.serialization.json.JsonException
 fun ObyteClient(
     block: HttpClientConfig<*>.() -> Unit = {}
 ): HttpClient = HttpClient {
+    configurePlatform()
     install(WebSockets)
     install(Logging) {
         logger = Logger.DEFAULT
@@ -31,12 +39,14 @@ fun ObyteClient(
     apply(block)
 }
 
+expect fun configurePlatform()
+
 val ObyteClientVersion = JustSaying.Version(
     program = "Unknown",
     programVersion = "0.0.0",
     library = "ObyteKt",
     libraryVersion = "0.3.12",
-    protocolVersion = "1.0t",
+    protocolVersion = "3.0t",
     alt = "2"
 )
 
@@ -72,18 +82,34 @@ suspend fun HttpClient.connect(
     val logger = Logger.DEFAULT
 
     wss(request) {
+        val commissionStrategy = CommissionStrategy()
+
         val responseChannel = BroadcastChannel<Response>(100)
-        val obyteConnection = ObyteConnection(obyteJson, logger, this)
-        val obyteClientContext = ObyteClientContextImpl(obyteConnection, responseChannel)
+        val obyteConnection = ObyteConnection(obyteJson, logger, this, responseChannel)
+
+        val remoteRepository = ObyteRemoteRepository(obyteConnection)
+
+        val unitContentHashAlgorithm = UnitContentHashAlgorithm(obyteJson)
+        val composer = Composer(
+            configurationRepository = remoteRepository,
+            dagStateRepository = remoteRepository,
+            paymentRepository = remoteRepository,
+            commissionStrategy = commissionStrategy,
+            unitContentHashAlgorithm = unitContentHashAlgorithm,
+            unitHashAlgorithm = UnitHashAlgorithm(obyteJson, unitContentHashAlgorithm)
+        )
+
+        val obyteClientContext = ObyteClientContextImpl(obyteConnection, composer)
         val obyteRequestContext = ObyteRequestContext(obyteConnection, obyteClientContext)
         val obyteSessionConfiguration = ObyteSessionConfiguration()
-
         obyteSessionConfiguration.apply(block)
 
         obyteClientContext.send(ObyteClientVersion)
 
-        with(obyteSessionConfiguration) {
-            obyteClientContext.apply { onConnectedFunction() }
+        launch {
+            with(obyteSessionConfiguration) {
+                obyteClientContext.apply { onConnectedFunction() }
+            }
         }
 
         loop@ for (frame in incoming) {

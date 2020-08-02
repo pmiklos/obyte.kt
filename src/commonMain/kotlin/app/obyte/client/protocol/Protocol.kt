@@ -1,5 +1,6 @@
 package app.obyte.client.protocol
 
+import app.obyte.client.util.encodeBase64
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
@@ -16,6 +17,10 @@ internal val protocolModule = SerializersModule {
         JustSaying.ExchangeRates::class with JustSaying.ExchangeRates.serializer()
         JustSaying.UpgradeRequired::class with EmptyBody("upgrade_required", JustSaying.UpgradeRequired)
         JustSaying.OldCore::class with EmptyBody("old core", JustSaying.OldCore)
+        JustSaying.NewAddressToWatch::class with JustSaying.NewAddressToWatch.serializer()
+        JustSaying.Info::class with JustSaying.Info.serializer()
+        JustSaying.HaveUpdates::class with EmptyBody("light/have_updates", JustSaying.HaveUpdates)
+        JustSaying.Joint::class with JustSaying.Joint.serializer()
     }
     polymorphic(Request::class) {
         Request.Subscribe::class with Request.Subscribe.serializer()
@@ -26,6 +31,8 @@ internal val protocolModule = SerializersModule {
         Request.GetDefinitionForAddress::class with Request.GetDefinitionForAddress.serializer()
         Request.PostJoint::class with Request.PostJoint.serializer()
         Request.GetJoint::class with Request.GetJoint.serializer()
+        Request.PickDivisibleCoinsForAmount::class with Request.PickDivisibleCoinsForAmount.serializer()
+        Request.GetBalances::class with Request.GetBalances.serializer()
     }
     polymorphic(Response::class) {
         Response.Subscribed::class with Response.Subscribed.serializer()
@@ -36,14 +43,14 @@ internal val protocolModule = SerializersModule {
         Response.GetDefinitionForAddress::class with Response.GetDefinitionForAddress.serializer()
         Response.PostJoint::class with Response.PostJoint.serializer()
         Response.GetJoint::class with Response.GetJoint.serializer()
+        Response.PickDivisibleCoinsForAmount::class with Response.PickDivisibleCoinsForAmount.serializer()
+        Response.GetBalances::class with Response.GetBalances.serializer()
     }
 }
 
 private val random = Random.Default
 
 private fun ByteArray.fillRandom(): ByteArray = apply { random.nextBytes(this) }
-
-internal expect fun ByteArray.encodeBase64(): String
 
 interface TaggedMessage {
     var tag: String
@@ -107,6 +114,40 @@ sealed class JustSaying : ObyteMessage() {
     }
 
     @Serializable
+    @SerialName("light/new_address_to_watch")
+    data class NewAddressToWatch(
+        val address: Address
+    ): JustSaying() {
+        @Serializer(forClass = NewAddressToWatch::class)
+        companion object: KSerializer<NewAddressToWatch> {
+            override fun serialize(encoder: Encoder, value: NewAddressToWatch) {
+                encoder.encodeSerializableValue(Address.serializer(), value.address)
+            }
+        }
+    }
+
+    @Serializable
+    @SerialName("info")
+    data class Info(
+        val message: String
+    ): JustSaying() {
+        @Serializer(forClass = Info::class)
+        companion object: KSerializer<Info> {
+            override fun deserialize(decoder: Decoder): Info = Info(decoder.decodeString())
+        }
+    }
+
+    @Serializable
+    @SerialName("joint")
+    data class Joint(
+        val unit: ObyteUnit
+    ): JustSaying()
+
+    @Serializable
+    @SerialName("light/have_updates")
+    object HaveUpdates: JustSaying()
+
+    @Serializable
     @SerialName("upgrade_required")
     object UpgradeRequired : JustSaying()
 
@@ -142,7 +183,7 @@ sealed class Request : ObyteMessage(),
     @Serializable
     @SerialName("light/get_parents_and_last_ball_and_witness_list_unit")
     data class GetParentsAndLastBallAndWitnessesUnit(
-        val witnesses: List<String>
+        val witnesses: List<Address>
     ) : Request()
 
     @Serializable
@@ -161,7 +202,7 @@ sealed class Request : ObyteMessage(),
     @Serializable
     @SerialName("light/get_definition_for_address")
     data class GetDefinitionForAddress(
-        val address: String
+        val address: Address
     ) : Request()
 
     @Serializable
@@ -179,6 +220,31 @@ sealed class Request : ObyteMessage(),
         companion object: KSerializer<GetJoint> {
             override fun serialize(encoder: Encoder, value: GetJoint) {
                 encoder.encodeSerializableValue(UnitHash.serializer(), value.unitHash)
+            }
+        }
+    }
+
+    @Serializable
+    @SerialName("light/pick_divisible_coins_for_amount")
+    data class PickDivisibleCoinsForAmount(
+        val addresses: List<Address>,
+        @SerialName("last_ball_mci")
+        val lastBallMci: Long,
+        val amount: Long,
+        val asset: UnitHash? = null,
+        @SerialName("spend_unconfirmed")
+        val spendUnconfirmed: SpendUnconfirmed
+    ): Request()
+
+    @Serializable
+    @SerialName("light/get_balances")
+    data class GetBalances(
+        val addresses: List<Address>
+    ): Request() {
+        @Serializer(forClass = GetBalances::class)
+        companion object: KSerializer<GetBalances> {
+            override fun serialize(encoder: Encoder, value: GetBalances) {
+                encoder.encodeSerializableValue(Address.serializer().list, value.addresses)
             }
         }
     }
@@ -211,13 +277,13 @@ sealed class Response : ObyteMessage(),
     @Serializable
     @SerialName("get_witnesses")
     data class GetWitnesses(
-        val witnesses: List<String>,
+        val witnesses: List<Address>,
         override var tag: String = ""
     ) : Response() {
         @Serializer(forClass = GetWitnesses::class)
         companion object : KSerializer<GetWitnesses> {
             override fun deserialize(decoder: Decoder): GetWitnesses {
-                val witnesses = decoder.decodeSerializableValue(String.serializer().list)
+                val witnesses = decoder.decodeSerializableValue(Address.serializer().list)
                 return GetWitnesses(witnesses)
             }
         }
@@ -228,15 +294,15 @@ sealed class Response : ObyteMessage(),
     data class GetParentsAndLastBallAndWitnessesUnit(
         val timestamp: Long,
         @SerialName("parent_units")
-        val parentUnits: List<String>,
+        val parentUnits: List<UnitHash>,
         @SerialName("last_stable_mc_ball")
-        val lastStableMcBall: String,
+        val lastStableMcBall: UnitHash,
         @SerialName("last_stable_mc_ball_unit")
-        val lastStableMcBallUnit: String,
+        val lastStableMcBallUnit: UnitHash,
         @SerialName("last_stable_mc_ball_mci")
         val lastStableMcBallMci: Long,
         @SerialName("witness_list_unit")
-        val witnessListUnit: String,
+        val witnessListUnit: UnitHash,
         override var tag: String = ""
     ) : Response()
 
@@ -261,7 +327,7 @@ sealed class Response : ObyteMessage(),
     data class GetDefinitionForAddress(
         @SerialName("definition_chash")
         val definitionChash: String,
-        val definition: JsonArray?,
+        val definition: JsonArray? = null,
         @SerialName("is_stable")
         val isStable: Boolean,
         override var tag: String = ""
@@ -289,4 +355,57 @@ sealed class Response : ObyteMessage(),
         override var tag: String = ""
     ): Response()
 
+    @Serializable
+    @SerialName("light/pick_divisible_coins_for_amount")
+    data class PickDivisibleCoinsForAmount(
+        @SerialName("inputs_with_proofs")
+        val inputsWithProof: List<InputWrapper>,
+        @SerialName("total_amount")
+        val totalAmount: Long,
+        override var tag: String = ""
+    ): Response()
+
+    @Serializable
+    @SerialName("light/get_balances")
+    data class GetBalances(
+        val balances: Map<Address, Map<UnitHash, Balance>>,
+        override var tag: String = ""
+    ): Response() {
+        @Serializer(forClass = GetBalances::class)
+        companion object: KSerializer<GetBalances> {
+            override fun deserialize(decoder: Decoder): GetBalances {
+                val balances = decoder.decodeSerializableValue(
+                    MapSerializer(
+                        Address.serializer(),
+                        MapSerializer(UnitHash.serializer(), Balance.serializer())
+                    ))
+                return GetBalances(balances)
+            }
+        }
+    }
 }
+
+@Serializable
+enum class SpendUnconfirmed {
+    @SerialName("all")
+    ALL,
+    @SerialName("own")
+    OWN,
+    @SerialName("none")
+    NONE
+}
+
+@Serializable
+data class InputWrapper(
+    val input: Input
+)
+
+@Serializable
+data class Balance(
+    val stable: Long,
+    val pending: Long,
+    @SerialName("stable_outputs_count")
+    val stableOutputsCount: Int,
+    @SerialName("pending_outputs_count")
+    val pendingOutputsCount: Int
+)

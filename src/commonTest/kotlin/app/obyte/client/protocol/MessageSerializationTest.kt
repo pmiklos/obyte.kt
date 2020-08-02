@@ -1,5 +1,7 @@
 package app.obyte.client.protocol
 
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -69,7 +71,7 @@ class MessageSerializationTest {
                 witnesses = listOf(
                     "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
                     "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
-                )
+                ).map { Address(it) }
             ).apply { tag = "123" })
         )
     }
@@ -94,7 +96,7 @@ class MessageSerializationTest {
         """.trimIndent(),
             json.stringify(
                 ObyteMessageSerializer, Request.GetDefinitionForAddress(
-                    address = "2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"
+                    address = Address("2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7")
                 ).apply { tag = "123" }
             )
         )
@@ -133,7 +135,9 @@ class MessageSerializationTest {
                     authors = listOf(
                         Author(
                             address = Address("ABC123"),
-                            authentifiers = mapOf("r" to "3eQPIFiPVLRwBwEzxUR5th")
+                            authentifiers = json {
+                                "r" to JsonPrimitive("3eQPIFiPVLRwBwEzxUR5th")
+                            }
                         )
                     ),
                     parentUnits = listOf(
@@ -144,7 +148,7 @@ class MessageSerializationTest {
                     witnessListUnit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
                     timestamp = 12345678,
                     unit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
-                    headerCommission = 100,
+                    headersCommission = 100,
                     payloadCommission = 200
                 )
             ).apply { tag = "123" })
@@ -160,6 +164,51 @@ class MessageSerializationTest {
                 ObyteMessageSerializer, Request.GetJoint(
                     unitHash = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY=")
                 ).apply { tag = "123" }
+            )
+        )
+    }
+
+    @Test
+    fun serializesPickDivisibleCoinsForAmount() {
+        assertEquals("""
+            ["request",{"command":"light/pick_divisible_coins_for_amount","params":{"addresses":["2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7"],"last_ball_mci":99,"amount":100,"asset":"f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY=","spend_unconfirmed":"own"},"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, Request.PickDivisibleCoinsForAmount(
+                    addresses = listOf(Address("2GPBEZTAXKWEXMWCTGZALIZDNWS5B3V7")),
+                    amount = 100,
+                    asset = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
+                    lastBallMci = 99,
+                    spendUnconfirmed = SpendUnconfirmed.OWN
+                ).apply { tag = "123" }
+            )
+        )
+    }
+
+    @Test
+    fun serializesGetBalances() {
+        assertEquals("""
+            ["request",{"command":"light/get_balances","params":["LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"],"tag":"123"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, Request.GetBalances(
+                    addresses = listOf(
+                        Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55")
+                    )
+                ).apply { tag = "123" }
+            )
+        )
+    }
+
+    @Test
+    fun serializesNewAddressToWatch() {
+        assertEquals("""
+            ["justsaying",{"subject":"light/new_address_to_watch","body":"LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"}]
+        """.trimIndent(),
+            json.stringify(
+                ObyteMessageSerializer, JustSaying.NewAddressToWatch(
+                    address = Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55")
+                )
             )
         )
     }

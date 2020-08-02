@@ -93,7 +93,7 @@ class MessageDeserializationTest {
                     "PA4QK46276MJJD5DBOLIBMYKNNXMUVDP",
                     "RJDYXC4YQ4AZKFYTJVCR5GQJF5J6KPRI",
                     "WELOXP3EOA75JWNO6S5ZJHOO3EYFKPIR"
-                )
+                ).map { Address(it) }
             ),
             json.parse(
                 ObyteMessageSerializer, """
@@ -104,16 +104,16 @@ class MessageDeserializationTest {
     }
 
     @Test
-    fun deserializes() {
+    fun deserializesGetParentsAndLastBallAndWitnessesUnit() {
         assertEquals(
             Response.GetParentsAndLastBallAndWitnessesUnit(
                 tag = "14erii/WmtUdKTJipHn/dXkg68jMlvZ6ZgOjqk/YdIQ=",
                 timestamp = 1594791527,
-                parentUnits = listOf("O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI="),
-                lastStableMcBall = "yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4=",
-                lastStableMcBallUnit = "wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk=",
+                parentUnits = listOf(UnitHash("O0Y+5ay6Rp7xz7TxyB2WuL08MhbMj2jGAuXF6OhjVcI=")),
+                lastStableMcBall = UnitHash("yc8CpinEifj8JbY41cXByyHHU3G+zjFmxV+Dc4JFWN4="),
+                lastStableMcBallUnit = UnitHash("wSelCzk3lTF8saQ2j1ISAXoTvD/ahTdK4uJl0UTDepk="),
                 lastStableMcBallMci = 1415908,
-                witnessListUnit = "TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="
+                witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato=")
             ),
             json.parse(
                 ObyteMessageSerializer, """
@@ -128,12 +128,16 @@ class MessageDeserializationTest {
         assertEquals(
             Response.GetDefinition(
                 tag = "FVZmlHRQ6v/tnpYG318CZa9kSj2cRhZpqVHo3h9i2+c=",
-                definition = JsonArray(listOf(
-                    JsonPrimitive("sig"),
-                    JsonObject(mapOf(
-                        "pubkey" to JsonPrimitive("Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr")
-                    ))
-                ))
+                definition = JsonArray(
+                    listOf(
+                        JsonPrimitive("sig"),
+                        JsonObject(
+                            mapOf(
+                                "pubkey" to JsonPrimitive("Aig4kzMri5Bu+tX/Bv3OI75qWsuilN0cAxWwN7T+Helr")
+                            )
+                        )
+                    )
+                )
             ),
             json.parse(
                 ObyteMessageSerializer, """
@@ -165,12 +169,16 @@ class MessageDeserializationTest {
             Response.GetDefinitionForAddress(
                 tag = "d3W6Q3I0SiLOsCdVYW0EP/BC6lqU0FdYq8nNMS3ZrgA=",
                 definitionChash = "2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX",
-                definition = JsonArray(listOf(
-                    JsonPrimitive("sig"),
-                    JsonObject(mapOf(
-                        "pubkey" to JsonPrimitive("AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq")
-                    ))
-                )),
+                definition = JsonArray(
+                    listOf(
+                        JsonPrimitive("sig"),
+                        JsonObject(
+                            mapOf(
+                                "pubkey" to JsonPrimitive("AqYvfx6o4sFL4qXVaBPUKMMpYkk8dYI9OFaT7N6RhGPq")
+                            )
+                        )
+                    )
+                ),
                 isStable = true
             ),
             json.parse(
@@ -194,6 +202,160 @@ class MessageDeserializationTest {
             """.trimIndent()
             )
         )
-
     }
+
+    @Test
+    fun deserializesPickDivisibleCoinsForAmountResponse() {
+        assertEquals(
+            Response.PickDivisibleCoinsForAmount(
+                inputsWithProof = listOf(
+                    InputWrapper(
+                        Input(
+                            unit = UnitHash("j80rqwBGAgWlg4MKDYLpc+qCfKmrFtZrsRNzvGvZY5E="),
+                            messageIndex = 0,
+                            outputIndex = 0
+                        )
+                    ),
+                    InputWrapper(
+                        Input(
+                            type = InputType.WITNESSING,
+                            fromMainChainIndex = 355095,
+                            toMainChainIndex = 355424
+                        )
+                    )
+                ),
+                totalAmount = 10418,
+                tag = "ZZDoW2n3W3FlcSl3+5ijQmC/dQujHmaxYiOHl27CP0M="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"ZZDoW2n3W3FlcSl3+5ijQmC/dQujHmaxYiOHl27CP0M=","command":"light/pick_divisible_coins_for_amount","response":{"inputs_with_proofs":[{"input":{"unit":"j80rqwBGAgWlg4MKDYLpc+qCfKmrFtZrsRNzvGvZY5E=","message_index":0,"output_index":0}},{"input":{"type":"witnessing","from_main_chain_index":355095,"to_main_chain_index":355424}}],"total_amount":10418}}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesEmptyGetBalances() {
+        assertEquals(
+            Response.GetBalances(
+                balances = emptyMap(),
+                tag = "52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ=","command":"light/get_balances","response":{}}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesGetBalances() {
+        assertEquals(
+            Response.GetBalances(
+                balances = mapOf(
+                    Address("2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX") to mapOf(
+                        UnitHash("base") to Balance(
+                            stable = 123L,
+                            pending = 456L,
+                            stableOutputsCount = 1,
+                            pendingOutputsCount = 1
+                        )
+                    )
+                ),
+                tag = "52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ="
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["response",{"tag":"52u3hw0LLkQ06ROR7bGKHx4WFveZbeWRIYKNI3LMQfQ=","command":"light/get_balances","response":{"2FF7PSL7FYXVU5UIQHCVDTTPUOOG75GX":{"base":{"stable":123,"pending":456,"stable_outputs_count":1,"pending_outputs_count":1}}}}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesInfo() {
+        assertEquals(
+            JustSaying.Info(
+                message = "now watching LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                ["justsaying",{"subject":"info","body":"now watching LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesHaveUpdates() {
+        assertEquals(
+            JustSaying.HaveUpdates,
+            json.parse(
+                ObyteMessageSerializer, """
+                    ["justsaying",{"subject":"light/have_updates"}]
+            """.trimIndent()
+            )
+        )
+    }
+
+    @Test
+    fun deserializesJoint() {
+        assertEquals(
+            JustSaying.Joint(
+                unit = ObyteUnit(
+                    version = "3.0t",
+                    alt = "2",
+                    messages = listOf(
+                        Message.Payment(
+                            payloadLocation = PayloadLocation.INLINE,
+                            payloadHash = "l8xtzcoXkbpIIT/bN3y71dfaCjhN9MaDJ3Bj6GyANU4=",
+                            payload = PaymentPayload(
+                                inputs = listOf(
+                                    Input(
+                                        unit = UnitHash("p95dgRRQfNs+HinvqcjASOL7zaPfj39e27Gu7PvMdek="),
+                                        messageIndex = 0,
+                                        outputIndex = 0
+                                    )
+                                ),
+                                outputs = listOf(
+                                    Output(
+                                        address = Address("LMOELQTU4U5XBWPWJRXLO5P54MQLCF55"),
+                                        amount = 1000
+                                    ),
+                                    Output(
+                                        address = Address("T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q"),
+                                        amount = 1474
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    authors = listOf(
+                        Author(
+                            address = Address("T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q"),
+                            authentifiers = json {
+                                "r" to JsonPrimitive("wScrUbfKHB3f0sQDwvy5TNnYeQPttDcM5v81w+6Gxko1b2bHC0S9FcYm7An/1YUb942AWGyklskSUccUROsNCw==")
+                            }
+                        )
+                    ),
+                    parentUnits = listOf(UnitHash("1GvR/CU6gt9U96yx+0Tg7WjG+3TJ6/OTxS5B9d072E4=")),
+                    lastBall = UnitHash("XCJMbQ5hkQG7eB82UIO3bA9YpRme/AVy3Y/6vRNhBro="),
+                    lastBallUnit = UnitHash("ktavor6h6GYlCavRAEd1OX7CKPood1OnvED0ZHal2F8="),
+                    timestamp = 1596215368,
+                    witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
+                    headersCommission = 452,
+                    payloadCommission = 311,
+                    unit = UnitHash("wYCq05xEIJLnR03/ivyhnL8IlOofiZCjsrlZkYvouU4=")
+                )
+            ),
+            json.parse(
+                ObyteMessageSerializer, """
+                    ["justsaying",{"subject":"joint","body":{"unit":{"version":"3.0t","alt":"2","messages":[{"app":"payment","payload_location":"inline","payload_hash":"l8xtzcoXkbpIIT/bN3y71dfaCjhN9MaDJ3Bj6GyANU4=","payload":{"inputs":[{"unit":"p95dgRRQfNs+HinvqcjASOL7zaPfj39e27Gu7PvMdek=","message_index":0,"output_index":0}],"outputs":[{"address":"LMOELQTU4U5XBWPWJRXLO5P54MQLCF55","amount":1000},{"address":"T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q","amount":1474}]}}],"authors":[{"address":"T7BTEFK6V6GBD3XLFTCZVBZTS4HS7R7Q","authentifiers":{"r":"wScrUbfKHB3f0sQDwvy5TNnYeQPttDcM5v81w+6Gxko1b2bHC0S9FcYm7An/1YUb942AWGyklskSUccUROsNCw=="}}],"parent_units":["1GvR/CU6gt9U96yx+0Tg7WjG+3TJ6/OTxS5B9d072E4="],"last_ball":"XCJMbQ5hkQG7eB82UIO3bA9YpRme/AVy3Y/6vRNhBro=","last_ball_unit":"ktavor6h6GYlCavRAEd1OX7CKPood1OnvED0ZHal2F8=","timestamp":1596215368,"witness_list_unit":"TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato=","headers_commission":452,"payload_commission":311,"unit":"wYCq05xEIJLnR03/ivyhnL8IlOofiZCjsrlZkYvouU4="}}}]
+            """.trimIndent()
+            )
+        )
+    }
+
 }

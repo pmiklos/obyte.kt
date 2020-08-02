@@ -1,5 +1,7 @@
 package app.obyte.client.protocol
 
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -42,7 +44,9 @@ class UnitSerializationTest {
                     authors = listOf(
                         Author(
                             address = Address("ABC123"),
-                            authentifiers = mapOf("r" to "3eQPIFiPVLRwBwEzxUR5th")
+                            authentifiers = json {
+                                "r" to JsonPrimitive("3eQPIFiPVLRwBwEzxUR5th")
+                            }
                         )
                     ),
                     parentUnits = listOf(
@@ -53,7 +57,7 @@ class UnitSerializationTest {
                     witnessListUnit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
                     timestamp = 12345678,
                     unit = UnitHash("f252ZI2MN3xu8wFJ+LktVDGsay2Udzi/AUauE9ZaifY="),
-                    headerCommission = 100,
+                    headersCommission = 100,
                     payloadCommission = 200
                 )
             )
