@@ -27,3 +27,11 @@ suspend inline fun ObyteClientContext.getBalances(addresses: List<Address>) =
 
 suspend inline fun ObyteClientContext.newAddressToWatch(address: Address) =
     send(JustSaying.NewAddressToWatch(address))
+
+// Enrichment on top of the base protocol
+
+suspend inline fun ObyteClientContext.getByteBalance(address: Address): Balance? {
+    val response = getBalances(listOf(address))
+    return response?.balances?.get(address)?.get(UnitHash("base"))
+}
+

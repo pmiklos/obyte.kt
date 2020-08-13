@@ -67,4 +67,43 @@ class ApplicationSerializationTest {
             )
         )
     }
+
+    @Test
+    fun serializesDataFeedMessage() {
+        assertEquals(
+            """
+            {"app":"data_feed","payload_location":"inline","payload_hash":"abcdef","payload":{"FEED_NAME1":"value1","FEED_NAME2":"value2"}}
+        """.trimIndent(),
+            json.stringify(
+                PolymorphicSerializer(Message::class), Message.DataFeed(
+                    payloadLocation = PayloadLocation.INLINE,
+                    payloadHash = "abcdef",
+                    payload = mapOf(
+                        "FEED_NAME1" to "value1",
+                        "FEED_NAME2" to "value2"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun deserializesDataFeedMessage() {
+        assertEquals(
+            Message.DataFeed(
+                payloadLocation = PayloadLocation.INLINE,
+                payloadHash = "abcdef",
+                payload = mapOf(
+                    "FEED_NAME1" to "value1",
+                    "FEED_NAME2" to "value2"
+                )
+            ),
+            json.parse(
+                PolymorphicSerializer(Message::class), """
+            {"app":"data_feed","payload_location":"inline","payload_hash":"abcdef","payload":{"FEED_NAME1":"value1","FEED_NAME2":"value2"}}
+        """.trimIndent()
+            )
+        )
+    }
+
 }

@@ -90,6 +90,20 @@ class Composer internal constructor(
             )
         }
 
+        val dataFeedMessages = builder.dataFeed.let { dataFeed ->
+            if (dataFeed.isNotEmpty()) {
+                listOf(
+                    Message.DataFeed(
+                        payloadLocation = PayloadLocation.INLINE,
+                        payload = dataFeed,
+                        payloadHash = dataFeed.hash()
+                    )
+                )
+            } else {
+                emptyList()
+            }
+        }
+
         val header = ObyteUnitHeader(
             version = "3.0t",
             alt = "2",
@@ -101,7 +115,7 @@ class Composer internal constructor(
             parentUnits = lightProps.parentUnits
         )
 
-        val messagesPlaceholder = listOf(bytePaymentMessage) + assetPaymentMessages
+        val messagesPlaceholder = listOf(bytePaymentMessage) + assetPaymentMessages + dataFeedMessages
 
         val headersCommission = commissionStrategy.headersCommission(
             header.copy(
@@ -129,7 +143,7 @@ class Composer internal constructor(
             payloadHash = finalPayload.hash()
         )
 
-        val messages = listOf(finalPayment) + assetPaymentMessages
+        val messages = listOf(finalPayment) + assetPaymentMessages + dataFeedMessages
 
         val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
         val signature = wallet.sign(contentHashToSign)
