@@ -1,14 +1,10 @@
 package app.obyte.client.util
 
 import org.bouncycastle.asn1.x9.X9ECParameters
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.ec.CustomNamedCurves
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECDomainParameters
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters
-import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import org.bouncycastle.crypto.signers.ECDSASigner
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
 import org.bouncycastle.math.ec.FixedPointCombMultiplier
@@ -70,22 +66,24 @@ private val secureRandom = SecureRandom.getInstanceStrong()
 actual fun generateSeed(): ByteArray = secureRandom.generateSeed(32)
 
 /**
- * @return a pair of a random private and public key
+ * @return a pair of a private and public key based on the seed
  */
 actual fun keyPair(seed: ByteArray): KeyPair {
-    val random= SecureRandom.getInstanceStrong().apply {
-        setSeed(seed)
-    }
-    val generator = ECKeyPairGenerator()
-    val keygenParams = ECKeyGenerationParameters(CURVE, random)
-    generator.init(keygenParams)
-    val keypair: AsymmetricCipherKeyPair = generator.generateKeyPair()
-    val privParams = keypair.private as ECPrivateKeyParameters
-    val pubParams = keypair.public as ECPublicKeyParameters
-    val privateKey = privParams.d.toByteArray(32)
-    val publicKey = pubParams.q.getEncoded(true)
+    var privateKey = BigInteger(seed)
 
-    return KeyPair(PrivateKey(privateKey), PublicKey(publicKey))
+    if (privateKey.bitLength() > CURVE.n.bitLength()) {
+        privateKey = privateKey.mod(CURVE.n)
+    }
+
+    try {
+        CURVE.validatePrivateScalar(privateKey)
+    } catch (e: java.lang.IllegalArgumentException) {
+        throw kotlin.IllegalArgumentException("Invalid private key")
+    }
+
+    val point = FixedPointCombMultiplier().multiply(CURVE.g, privateKey)
+
+    return KeyPair(PrivateKey(privateKey.toByteArray()), PublicKey(point.getEncoded(true)))
 }
 
 private fun BigInteger.toByteArray(size: Int): ByteArray {

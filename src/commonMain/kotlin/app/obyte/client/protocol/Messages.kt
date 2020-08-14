@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.SerializersModule
 internal val messageModule = SerializersModule {
     polymorphic(Message::class) {
         Message.Payment::class with Message.Payment.serializer()
+        Message.DataFeed::class with Message.DataFeed.serializer()
     }
 }
 
@@ -21,6 +22,16 @@ sealed class Message {
         @SerialName("payload_hash")
         val payloadHash: String,
         val payload: PaymentPayload
+    ) : Message()
+
+    @Serializable
+    @SerialName("data_feed")
+    data class DataFeed(
+        @SerialName("payload_location")
+        val payloadLocation: PayloadLocation,
+        @SerialName("payload_hash")
+        val payloadHash: String,
+        val payload: DataFeedPayload
     ) : Message()
 
 }
@@ -76,3 +87,5 @@ data class PaymentPayload(
     val inputs: List<Input>,
     val outputs: List<Output>
 )
+
+typealias DataFeedPayload = Map<String, String>
