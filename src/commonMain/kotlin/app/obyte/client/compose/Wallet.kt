@@ -1,5 +1,6 @@
 package app.obyte.client.compose
 
+import app.obyte.client.configurePlatform
 import app.obyte.client.protocol.Address
 import app.obyte.client.util.KeyPair
 import app.obyte.client.util.PrivateKey
@@ -25,6 +26,10 @@ class Wallet internal constructor(
 
     companion object {
         private val random = Random(1) // TODO remove this eventually since it's not random, testing only
+
+        init {
+            configurePlatform()
+        }
 
         fun random(): Wallet {
             val key = ByteArray(32)
