@@ -4,5 +4,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
 actual fun configurePlatform() {
-    Security.addProvider(BouncyCastleProvider())
+    val bouncyCastleProvider = BouncyCastleProvider()
+    if (Security.getProvider(bouncyCastleProvider.name) == null) {
+        Security.addProvider(bouncyCastleProvider)
+    }
 }
