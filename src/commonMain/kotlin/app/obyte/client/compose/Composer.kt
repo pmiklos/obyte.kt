@@ -6,6 +6,8 @@ import app.obyte.client.util.encodeBase64
 import io.ktor.util.date.GMTDate
 import kotlinx.serialization.json.json
 
+private const val TYPICAL_PAYMENT_PAYLOAD_COMMISSION = 300
+
 class Composer internal constructor(
     private val configurationRepository: ConfigurationRepository,
     private val dagStateRepository: DagStateRepository,
@@ -15,13 +17,9 @@ class Composer internal constructor(
     private val unitHashAlgorithm: UnitHashAlgorithm
 ) {
 
-    private val authentifierPlaceholder = json {
-        "r" to "placeholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholder"
-    }
-
-    suspend fun unit(wallet: Wallet, build: UnitBuilder.() -> Unit): ObyteUnit {
-        val builder = UnitBuilder()
-        builder.build()
+    suspend fun unit(wallet: Wallet, configure: UnitBuilder.() -> Unit): ObyteUnit {
+        val builder = UnitBuilder(wallet)
+        builder.configure()
 
         val from = wallet.address
         val witnesses = configurationRepository.getWitnesses()
@@ -32,77 +30,10 @@ class Composer internal constructor(
             throw ObyteException("Definition or definition change for address $from is not stable yet")
         }
 
-        val bytePayment = builder.bytePayment ?: BytePayment(from, 0)
-
-        val estimatedCost = 700  // TODO estimate cost
-        val estimatedByteAmount = bytePayment.amount + estimatedCost
-        val spendableBytes = spendableCoins(lightProps.lastStableMcBallMci, from, estimatedByteAmount)
-
         val author = Author(
             address = from,
-            definition = if (storedDefinition.definition == null) {
-                wallet.addressDefinition
-            } else {
-                null
-            }
+            definition = if (storedDefinition.definition == null) wallet.addressDefinition else null
         )
-
-        val feePayingOutput = Output(
-            address = from,
-            amount = spendableBytes.totalAmount - bytePayment.amount
-        )
-
-        val bytePaymentOutput = Output(
-            address = bytePayment.to,
-            amount = bytePayment.amount
-        )
-
-        val bytePaymentPayload = PaymentPayload(
-            inputs = spendableBytes.inputsWithProof.map { it.input },
-            outputs = outputsOf(feePayingOutput, bytePaymentOutput)
-        )
-
-        val bytePaymentMessage = Message.Payment(
-            payloadLocation = PayloadLocation.INLINE,
-            payload = bytePaymentPayload,
-            payloadHash = bytePaymentPayload.hash()
-        )
-
-        val assetPaymentMessages = builder.assetPayments.map { assetPayment ->
-            val spendableAssets =
-                spendableCoins(lightProps.lastStableMcBallMci, from, assetPayment.amount, assetPayment.asset)
-
-            val assetPaymentOutput = Output(
-                address = assetPayment.to,
-                amount = assetPayment.amount
-            )
-
-            val assetPaymentPayload = PaymentPayload(
-                asset = assetPayment.asset,
-                inputs = spendableAssets.inputsWithProof.map { it.input },
-                outputs = outputsOf(assetPaymentOutput)
-            )
-
-            Message.Payment(
-                payloadLocation = PayloadLocation.INLINE,
-                payload = assetPaymentPayload,
-                payloadHash = assetPaymentPayload.hash()
-            )
-        }
-
-        val dataFeedMessages = builder.dataFeed.let { dataFeed ->
-            if (dataFeed.isNotEmpty()) {
-                listOf(
-                    Message.DataFeed(
-                        payloadLocation = PayloadLocation.INLINE,
-                        payload = dataFeed,
-                        payloadHash = dataFeed.hash()
-                    )
-                )
-            } else {
-                emptyList()
-            }
-        }
 
         val header = ObyteUnitHeader(
             version = "3.0t",
@@ -115,35 +46,21 @@ class Composer internal constructor(
             parentUnits = lightProps.parentUnits
         )
 
-        val messagesPlaceholder = listOf(bytePaymentMessage) + assetPaymentMessages + dataFeedMessages
+        val assetPayments = builder.buildAssetPayments(lightProps.lastStableMcBallMci, paymentRepository)
+        val dataFeed = builder.buildDataFeed()
+        val otherMessages = assetPayments + dataFeed
 
-        val headersCommission = commissionStrategy.headersCommission(
-            header.copy(
-                authors = listOf(
-                    author.copy(
-                        authentifiers = authentifierPlaceholder
-                    )
-                )
-            )
-        )
+        val headersCommission = commissionStrategy.headersCommission(header)
+        val otherPayloadCommission = commissionStrategy.payloadCommission(otherMessages)
+        val estimatedCommission = headersCommission + TYPICAL_PAYMENT_PAYLOAD_COMMISSION + otherPayloadCommission
+        val estimatedBytePayment = builder.buildBytePayment(estimatedCommission, lightProps.lastStableMcBallMci, paymentRepository)
 
-        val payloadCommission = commissionStrategy.payloadCommission(messagesPlaceholder)
+        val payloadCommission = commissionStrategy.payloadCommission(listOf(estimatedBytePayment) + otherMessages)
+        val totalCommission = headersCommission + payloadCommission
 
-        val finalPayload = bytePaymentPayload.copy(
-            outputs = outputsOf(
-                feePayingOutput.copy(
-                    amount = feePayingOutput.amount - headersCommission - payloadCommission
-                ),
-                bytePaymentOutput
-            )
-        )
+        val finalBytePayment = builder.buildBytePayment(totalCommission, lightProps.lastStableMcBallMci, paymentRepository)
 
-        val finalPayment = bytePaymentMessage.copy(
-            payload = finalPayload,
-            payloadHash = finalPayload.hash()
-        )
-
-        val messages = listOf(finalPayment) + assetPaymentMessages + dataFeedMessages
+        val messages = listOf(finalBytePayment) + otherMessages
 
         val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
         val signature = wallet.sign(contentHashToSign)
@@ -173,23 +90,5 @@ class Composer internal constructor(
             unit = unitHashAlgorithm.calculate(unit)
         )
     }
-
-    private suspend fun spendableCoins(
-        lastBallMci: Long,
-        address: Address,
-        targetAmount: Long,
-        asset: UnitHash? = null
-    ) =
-        paymentRepository.pickDivisibleCoinsForAmount(
-            Request.PickDivisibleCoinsForAmount(
-                addresses = listOf(address),
-                amount = targetAmount,
-                asset = asset,
-                lastBallMci = lastBallMci,
-                spendUnconfirmed = SpendUnconfirmed.OWN
-            )
-        )
-
-    private fun outputsOf(vararg outputs: Output) = listOf(*outputs).filter { it.amount != 0L }.sortedWith(OutputSorter)
 
 }

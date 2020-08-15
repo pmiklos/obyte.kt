@@ -14,7 +14,7 @@ repositories {
     mavenCentral()
 }
 group = "app.obyte.client"
-version = "0.4.0"
+version = "0.4.1"
 
 kotlin {
     jvm()

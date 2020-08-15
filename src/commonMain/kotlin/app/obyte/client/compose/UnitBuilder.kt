@@ -1,44 +1,134 @@
 package app.obyte.client.compose
 
-import app.obyte.client.protocol.Address
-import app.obyte.client.protocol.UnitHash
+import app.obyte.client.protocol.*
 
-class UnitBuilder internal constructor() {
+class UnitBuilder internal constructor(private val wallet: Wallet) {
 
-    internal val assetPayments: List<AssetPayment> get() = mutableAssetPayments.toList()
-    internal val dataFeed: Map<String, String> get() = mutableDataFeed.toMap()
-    internal val bytePayment: BytePayment? get() = mutableBytePayment
-
-    private var mutableBytePayment: BytePayment? = null
-    private var mutableAssetPayments: MutableList<AssetPayment> = mutableListOf()
-    private var mutableDataFeed: MutableMap<String, String> = mutableMapOf()
+    private var bytePayment: BytePayment? = null
+    private var assetPayments: MutableList<AssetPayment> = mutableListOf()
+    private var dataFeed: MutableMap<String, String> = mutableMapOf()
 
     fun payment(to: Address, amount: Long, asset: UnitHash? = null) {
         if (asset == null) {
-            mutableBytePayment = BytePayment(to, amount)
+            bytePayment = BytePayment(to, amount)
         } else {
-            mutableAssetPayments.add(AssetPayment(to, amount, asset))
+            assetPayments.add(AssetPayment(to, amount, asset))
         }
     }
 
     fun dataFeed(build: DataFeedBuilder.() -> Unit) {
         val builder = DataFeedBuilder()
         builder.build()
-        mutableDataFeed.putAll(builder.mutableDataFeed)
+        dataFeed.putAll(builder.dataFeed)
     }
+
+    internal suspend fun buildBytePayment(
+        commission: Int,
+        lastBallMci: Long,
+        paymentRepository: PaymentRepository
+    ): Message.Payment {
+        val bytePayment = bytePayment ?: BytePayment(wallet.address, 0)
+
+        val spendableBytes =
+            paymentRepository.pickDivisibleCoinsForAmount(
+                Request.PickDivisibleCoinsForAmount(
+                    addresses = listOf(wallet.address),
+                    amount = bytePayment.amount + commission,
+                    asset = null,
+                    lastBallMci = lastBallMci,
+                    spendUnconfirmed = SpendUnconfirmed.OWN
+                )
+            )
+
+        val changeOutput = Output(
+            address = wallet.address,
+            amount = spendableBytes.totalAmount - (bytePayment.amount + commission)
+        )
+
+        val bytePaymentOutput = Output(
+            address = bytePayment.to,
+            amount = bytePayment.amount
+        )
+
+        val bytePaymentPayload = PaymentPayload(
+            inputs = spendableBytes.inputsWithProof.map { it.input },
+            outputs = outputsOf(changeOutput, bytePaymentOutput)
+        )
+
+        return Message.Payment(
+            payloadLocation = PayloadLocation.INLINE,
+            payload = bytePaymentPayload,
+            payloadHash = bytePaymentPayload.hash()
+        )
+    }
+
+    internal suspend fun buildAssetPayments(
+        lastBallMci: Long,
+        paymentRepository: PaymentRepository
+    ): List<Message.Payment> {
+        return assetPayments.map { assetPayment ->
+            val spendableAssets =
+                paymentRepository.pickDivisibleCoinsForAmount(
+                    Request.PickDivisibleCoinsForAmount(
+                        addresses = listOf(wallet.address),
+                        amount = assetPayment.amount,
+                        asset = assetPayment.asset,
+                        lastBallMci = lastBallMci,
+                        spendUnconfirmed = SpendUnconfirmed.OWN
+                    )
+                )
+
+            val changeOutput = Output(
+                address = wallet.address,
+                amount = spendableAssets.totalAmount - assetPayment.amount
+            )
+
+            val assetPaymentOutput = Output(
+                address = assetPayment.to,
+                amount = assetPayment.amount
+            )
+
+            val assetPaymentPayload = PaymentPayload(
+                asset = assetPayment.asset,
+                inputs = spendableAssets.inputsWithProof.map { it.input },
+                outputs = outputsOf(changeOutput, assetPaymentOutput)
+            )
+
+            Message.Payment(
+                payloadLocation = PayloadLocation.INLINE,
+                payload = assetPaymentPayload,
+                payloadHash = assetPaymentPayload.hash()
+            )
+        }
+    }
+
+    internal fun buildDataFeed(): List<Message.DataFeed> {
+        return if (dataFeed.isNotEmpty()) {
+            listOf(
+                Message.DataFeed(
+                    payloadLocation = PayloadLocation.INLINE,
+                    payload = dataFeed,
+                    payloadHash = dataFeed.hash()
+                )
+            )
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun outputsOf(vararg outputs: Output) = listOf(*outputs).filter { it.amount != 0L }.sortedWith(OutputSorter)
 
 }
 
 class DataFeedBuilder {
 
-    internal var mutableDataFeed: MutableMap<String, String> = mutableMapOf()
+    internal var dataFeed: MutableMap<String, String> = mutableMapOf()
 
     infix fun String.to(that: String) {
-        mutableDataFeed[this] = that
+        dataFeed[this] = that
     }
 
 }
-
 
 internal data class BytePayment(
     val to: Address,
