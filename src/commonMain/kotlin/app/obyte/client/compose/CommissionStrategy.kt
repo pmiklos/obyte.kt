@@ -8,10 +8,21 @@ class CommissionStrategy {
 
     private val placeholderParents = listOf(unitHashPlaceholder, unitHashPlaceholder)
 
+    private val authentifierPlaceholder = json {
+        "r" to "placeholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholderplaceholder"
+    }
+
     fun headersCommission(header: ObyteUnitHeader): Int {
-        val element = obyteJson.toJson(ObyteUnitHeader.serializer(), header.copy(
-            parentUnits = placeholderParents
-        ))
+        val element = obyteJson.toJson(
+            ObyteUnitHeader.serializer(), header.copy(
+                parentUnits = placeholderParents,
+                authors = header.authors.map { author ->
+                    author.copy(
+                        authentifiers = authentifierPlaceholder
+                    )
+                }
+            )
+        )
         return lengthOf(element)
     }
 
@@ -22,7 +33,7 @@ class CommissionStrategy {
         })
     }
 
-    private fun lengthOf(element: JsonElement): Int = when(element) {
+    private fun lengthOf(element: JsonElement): Int = when (element) {
         is JsonLiteral -> when {
             element.isString -> element.content.length
             element.booleanOrNull != null -> 1
