@@ -6,7 +6,7 @@ import app.obyte.client.util.encodeBase64
 import io.ktor.util.date.GMTDate
 import kotlinx.serialization.json.json
 
-private const val TYPICAL_COMMISSION = 700
+private const val TYPICAL_PAYMENT_PAYLOAD_COMMISSION = 300
 
 class Composer internal constructor(
     private val configurationRepository: ConfigurationRepository,
@@ -46,19 +46,21 @@ class Composer internal constructor(
             parentUnits = lightProps.parentUnits
         )
 
-        val estimatedBytePayment = builder.buildBytePayment(TYPICAL_COMMISSION, lightProps.lastStableMcBallMci, paymentRepository)
         val assetPayments = builder.buildAssetPayments(lightProps.lastStableMcBallMci, paymentRepository)
         val dataFeed = builder.buildDataFeed()
-
-        val messagesPlaceholder = listOf(estimatedBytePayment) + assetPayments + dataFeed
+        val otherMessages = assetPayments + dataFeed
 
         val headersCommission = commissionStrategy.headersCommission(header)
-        val payloadCommission = commissionStrategy.payloadCommission(messagesPlaceholder)
+        val otherPayloadCommission = commissionStrategy.payloadCommission(otherMessages)
+        val estimatedCommission = headersCommission + TYPICAL_PAYMENT_PAYLOAD_COMMISSION + otherPayloadCommission
+        val estimatedBytePayment = builder.buildBytePayment(estimatedCommission, lightProps.lastStableMcBallMci, paymentRepository)
+
+        val payloadCommission = commissionStrategy.payloadCommission(listOf(estimatedBytePayment) + otherMessages)
         val totalCommission = headersCommission + payloadCommission
 
         val finalBytePayment = builder.buildBytePayment(totalCommission, lightProps.lastStableMcBallMci, paymentRepository)
 
-        val messages = listOf(finalBytePayment) + assetPayments + dataFeed
+        val messages = listOf(finalBytePayment) + otherMessages
 
         val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
         val signature = wallet.sign(contentHashToSign)

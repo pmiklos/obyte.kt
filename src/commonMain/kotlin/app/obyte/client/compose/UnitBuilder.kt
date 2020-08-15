@@ -78,6 +78,11 @@ class UnitBuilder internal constructor(private val wallet: Wallet) {
                     )
                 )
 
+            val changeOutput = Output(
+                address = wallet.address,
+                amount = spendableAssets.totalAmount - assetPayment.amount
+            )
+
             val assetPaymentOutput = Output(
                 address = assetPayment.to,
                 amount = assetPayment.amount
@@ -86,7 +91,7 @@ class UnitBuilder internal constructor(private val wallet: Wallet) {
             val assetPaymentPayload = PaymentPayload(
                 asset = assetPayment.asset,
                 inputs = spendableAssets.inputsWithProof.map { it.input },
-                outputs = outputsOf(assetPaymentOutput)
+                outputs = outputsOf(changeOutput, assetPaymentOutput)
             )
 
             Message.Payment(
