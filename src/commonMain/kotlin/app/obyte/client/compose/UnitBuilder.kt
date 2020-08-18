@@ -1,5 +1,6 @@
 package app.obyte.client.compose
 
+import app.obyte.client.ObyteException
 import app.obyte.client.protocol.*
 
 class UnitBuilder internal constructor(private val wallet: Wallet) {
@@ -45,6 +46,12 @@ class UnitBuilder internal constructor(private val wallet: Wallet) {
             amount = spendableBytes.totalAmount - (bytePayment.amount + commission)
         )
 
+        if (changeOutput.amount < 0) {
+            throw ObyteException("Not enough spendable funds. " +
+                    "Expected at least ${bytePayment.amount + commission} bytes ($commission in fees) " +
+                    "got ${spendableBytes.totalAmount}")
+        }
+
         val bytePaymentOutput = Output(
             address = bytePayment.to,
             amount = bytePayment.amount
@@ -82,6 +89,11 @@ class UnitBuilder internal constructor(private val wallet: Wallet) {
                 address = wallet.address,
                 amount = spendableAssets.totalAmount - assetPayment.amount
             )
+
+            if (changeOutput.amount < 0) {
+                throw ObyteException("Not enough spendable funds of ${assetPayment.asset}. " +
+                        "Expected at least ${assetPayment.amount} got ${spendableAssets.totalAmount}")
+            }
 
             val assetPaymentOutput = Output(
                 address = assetPayment.to,

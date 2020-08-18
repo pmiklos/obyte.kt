@@ -6,7 +6,7 @@ import app.obyte.client.util.encodeBase64
 import io.ktor.util.date.GMTDate
 import kotlinx.serialization.json.json
 
-private const val TYPICAL_PAYMENT_PAYLOAD_COMMISSION = 300
+private const val TYPICAL_PAYMENT_PAYLOAD_COMMISSION = 250
 
 class Composer internal constructor(
     private val configurationRepository: ConfigurationRepository,
