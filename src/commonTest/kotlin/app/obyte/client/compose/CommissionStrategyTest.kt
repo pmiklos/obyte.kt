@@ -1,10 +1,7 @@
 package app.obyte.client.compose
 
 import app.obyte.client.protocol.*
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.json
-import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -53,8 +50,11 @@ class CommissionStrategyTest {
             alt = "2",
             authors = listOf(Author(
                 address = Address("O4K4QILG6VPGTYLRAI2RGYRFJZ7N2Q2O"),
-                authentifiers = json {
-                    "r" to JsonPrimitive("8jerSGskJS6Z0RfyMrYizkvAbdfmAz2isgwAGLckBGdGiMLzWQc2Ggk83sggHQOBo9k4S3w7oeuhaxu4n2c3Ug==")
+                authentifiers = buildJsonObject {
+                    put(
+                        "r",
+                        JsonPrimitive("8jerSGskJS6Z0RfyMrYizkvAbdfmAz2isgwAGLckBGdGiMLzWQc2Ggk83sggHQOBo9k4S3w7oeuhaxu4n2c3Ug==")
+                    )
                 }
             )),
             witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),
@@ -74,14 +74,20 @@ class CommissionStrategyTest {
             alt = "2",
             authors = listOf(Author(
                 address = Address("U4HU6L6U46EVK3BAO3KA7EDQYAR6I77V"),
-                definition = jsonArray {
-                    +"sig"
-                    +json {
-                        "pubkey" to JsonPrimitive("Ag9QxMLvQEXSEIs/V6DmdGJ13HYr/rmmabVX9mCM23ym")
-                    }
+                definition = buildJsonArray {
+                    add("sig")
+                    add(buildJsonObject {
+                        put(
+                            "pubkey",
+                            JsonPrimitive("Ag9QxMLvQEXSEIs/V6DmdGJ13HYr/rmmabVX9mCM23ym")
+                        )
+                    })
                 },
-                authentifiers = json {
-                    "r" to JsonPrimitive("T7Jr/5JLCDdo/qsWeS7l2IxrKo5XX8px49jxWV7rYGYobEwD4ZHtsr7zFNWCCQrCCHBjzcaBMQbkY0yNL58eug==")
+                authentifiers = buildJsonObject {
+                    put(
+                        "r",
+                        JsonPrimitive("T7Jr/5JLCDdo/qsWeS7l2IxrKo5XX8px49jxWV7rYGYobEwD4ZHtsr7zFNWCCQrCCHBjzcaBMQbkY0yNL58eug==")
+                    )
                 }
             )),
             witnessListUnit = UnitHash("TvqutGPz3T4Cs6oiChxFlclY92M2MvCvfXR5/FETato="),

@@ -1,6 +1,7 @@
 package app.obyte.client.protocol
 
 import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.parse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,7 +15,7 @@ class ApplicationSerializationTest {
             """
             {"app":"payment","payload_location":"inline","payload_hash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
         """.trimIndent(),
-            json.stringify(
+            json.encodeToString(
                 PolymorphicSerializer(Message::class), Message.Payment(
                     payloadLocation = PayloadLocation.INLINE,
                     payloadHash = "abcdef",
@@ -60,7 +61,7 @@ class ApplicationSerializationTest {
                     )
                 )
             ),
-            json.parse(
+            json.decodeFromString(
                 PolymorphicSerializer(Message::class), """
             {"app":"payment","payload_location":"inline","payload_hash":"abcdef","payload":{"inputs":[{"unit":"abcdef","message_index":0,"output_index":1}],"outputs":[{"address":"ABCDEF","amount":123}]}}
         """.trimIndent()
@@ -74,7 +75,7 @@ class ApplicationSerializationTest {
             """
             {"app":"data_feed","payload_location":"inline","payload_hash":"abcdef","payload":{"FEED_NAME1":"value1","FEED_NAME2":"value2"}}
         """.trimIndent(),
-            json.stringify(
+            json.encodeToString(
                 PolymorphicSerializer(Message::class), Message.DataFeed(
                     payloadLocation = PayloadLocation.INLINE,
                     payloadHash = "abcdef",
@@ -98,7 +99,7 @@ class ApplicationSerializationTest {
                     "FEED_NAME2" to "value2"
                 )
             ),
-            json.parse(
+            json.decodeFromString(
                 PolymorphicSerializer(Message::class), """
             {"app":"data_feed","payload_location":"inline","payload_hash":"abcdef","payload":{"FEED_NAME1":"value1","FEED_NAME2":"value2"}}
         """.trimIndent()

@@ -1,50 +1,68 @@
 package app.obyte.client.protocol
 
 import app.obyte.client.util.encodeBase64
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.list
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 import kotlin.random.Random
 
 internal val protocolModule = SerializersModule {
     polymorphic(JustSaying::class) {
-        JustSaying.Version::class with JustSaying.Version.serializer()
-        JustSaying.HubChallenge::class with JustSaying.HubChallenge.serializer()
-        JustSaying.ExchangeRates::class with JustSaying.ExchangeRates.serializer()
-        JustSaying.UpgradeRequired::class with EmptyBody("upgrade_required", JustSaying.UpgradeRequired)
-        JustSaying.OldCore::class with EmptyBody("old core", JustSaying.OldCore)
-        JustSaying.NewAddressToWatch::class with JustSaying.NewAddressToWatch.serializer()
-        JustSaying.Info::class with JustSaying.Info.serializer()
-        JustSaying.HaveUpdates::class with EmptyBody("light/have_updates", JustSaying.HaveUpdates)
-        JustSaying.Joint::class with JustSaying.Joint.serializer()
+        subclass(JustSaying.Version::class, JustSaying.Version.serializer())
+        subclass(JustSaying.HubChallenge::class, JustSaying.HubChallenge.serializer())
+        subclass(JustSaying.ExchangeRates::class, JustSaying.ExchangeRates.serializer())
+        subclass(
+            JustSaying.UpgradeRequired::class,
+            EmptyBody("upgrade_required", JustSaying.UpgradeRequired)
+        )
+        subclass(JustSaying.OldCore::class, EmptyBody("old core", JustSaying.OldCore))
+        subclass(JustSaying.NewAddressToWatch::class, JustSaying.NewAddressToWatch.serializer())
+        subclass(JustSaying.Info::class, JustSaying.Info.serializer())
+        subclass(
+            JustSaying.HaveUpdates::class,
+            EmptyBody("light/have_updates", JustSaying.HaveUpdates)
+        )
+        subclass(JustSaying.Joint::class, JustSaying.Joint.serializer())
     }
     polymorphic(Request::class) {
-        Request.Subscribe::class with Request.Subscribe.serializer()
-        Request.Heartbeat::class with Request.Heartbeat.serializer()
-        Request.GetWitnesses::class with Request.GetWitnesses.serializer()
-        Request.GetParentsAndLastBallAndWitnessesUnit::class with Request.GetParentsAndLastBallAndWitnessesUnit.serializer()
-        Request.GetDefinition::class with Request.GetDefinition.serializer()
-        Request.GetDefinitionForAddress::class with Request.GetDefinitionForAddress.serializer()
-        Request.PostJoint::class with Request.PostJoint.serializer()
-        Request.GetJoint::class with Request.GetJoint.serializer()
-        Request.PickDivisibleCoinsForAmount::class with Request.PickDivisibleCoinsForAmount.serializer()
-        Request.GetBalances::class with Request.GetBalances.serializer()
+        subclass(Request.Subscribe::class, Request.Subscribe.serializer())
+        subclass(Request.Heartbeat::class, Request.Heartbeat.serializer())
+        subclass(Request.GetWitnesses::class, Request.GetWitnesses.serializer())
+        subclass(
+            Request.GetParentsAndLastBallAndWitnessesUnit::class,
+            Request.GetParentsAndLastBallAndWitnessesUnit.serializer()
+        )
+        subclass(Request.GetDefinition::class, Request.GetDefinition.serializer())
+        subclass(Request.GetDefinitionForAddress::class, Request.GetDefinitionForAddress.serializer())
+        subclass(Request.PostJoint::class, Request.PostJoint.serializer())
+        subclass(Request.GetJoint::class, Request.GetJoint.serializer())
+        subclass(Request.PickDivisibleCoinsForAmount::class, Request.PickDivisibleCoinsForAmount.serializer())
+        subclass(Request.GetBalances::class, Request.GetBalances.serializer())
     }
     polymorphic(Response::class) {
-        Response.Subscribed::class with Response.Subscribed.serializer()
-        Response.Heartbeat::class with Response.Heartbeat.serializer()
-        Response.GetWitnesses::class with Response.GetWitnesses.serializer()
-        Response.GetParentsAndLastBallAndWitnessesUnit::class with Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
-        Response.GetDefinition::class with Response.GetDefinition.serializer()
-        Response.GetDefinitionForAddress::class with Response.GetDefinitionForAddress.serializer()
-        Response.PostJoint::class with Response.PostJoint.serializer()
-        Response.GetJoint::class with Response.GetJoint.serializer()
-        Response.PickDivisibleCoinsForAmount::class with Response.PickDivisibleCoinsForAmount.serializer()
-        Response.GetBalances::class with Response.GetBalances.serializer()
+        subclass(Response.Subscribed::class, Response.Subscribed.serializer())
+        subclass(Response.Heartbeat::class, Response.Heartbeat.serializer())
+        subclass(Response.GetWitnesses::class, Response.GetWitnesses.serializer())
+        subclass(
+            Response.GetParentsAndLastBallAndWitnessesUnit::class,
+            Response.GetParentsAndLastBallAndWitnessesUnit.serializer()
+        )
+        subclass(Response.GetDefinition::class, Response.GetDefinition.serializer())
+        subclass(Response.GetDefinitionForAddress::class, Response.GetDefinitionForAddress.serializer())
+        subclass(Response.PostJoint::class, Response.PostJoint.serializer())
+        subclass(Response.GetJoint::class, Response.GetJoint.serializer())
+        subclass(Response.PickDivisibleCoinsForAmount::class, Response.PickDivisibleCoinsForAmount.serializer())
+        subclass(Response.GetBalances::class, Response.GetBalances.serializer())
     }
 }
 
@@ -117,9 +135,9 @@ sealed class JustSaying : ObyteMessage() {
     @SerialName("light/new_address_to_watch")
     data class NewAddressToWatch(
         val address: Address
-    ): JustSaying() {
+    ) : JustSaying() {
         @Serializer(forClass = NewAddressToWatch::class)
-        companion object: KSerializer<NewAddressToWatch> {
+        companion object : KSerializer<NewAddressToWatch> {
             override fun serialize(encoder: Encoder, value: NewAddressToWatch) {
                 encoder.encodeSerializableValue(Address.serializer(), value.address)
             }
@@ -130,9 +148,9 @@ sealed class JustSaying : ObyteMessage() {
     @SerialName("info")
     data class Info(
         val message: String
-    ): JustSaying() {
+    ) : JustSaying() {
         @Serializer(forClass = Info::class)
-        companion object: KSerializer<Info> {
+        companion object : KSerializer<Info> {
             override fun deserialize(decoder: Decoder): Info = Info(decoder.decodeString())
         }
     }
@@ -141,11 +159,11 @@ sealed class JustSaying : ObyteMessage() {
     @SerialName("joint")
     data class Joint(
         val unit: ObyteUnit
-    ): JustSaying()
+    ) : JustSaying()
 
     @Serializable
     @SerialName("light/have_updates")
-    object HaveUpdates: JustSaying()
+    object HaveUpdates : JustSaying()
 
     @Serializable
     @SerialName("upgrade_required")
@@ -215,9 +233,9 @@ sealed class Request : ObyteMessage(),
     @SerialName("get_joint")
     data class GetJoint(
         val unitHash: UnitHash
-    ): Request() {
+    ) : Request() {
         @Serializer(forClass = GetJoint::class)
-        companion object: KSerializer<GetJoint> {
+        companion object : KSerializer<GetJoint> {
             override fun serialize(encoder: Encoder, value: GetJoint) {
                 encoder.encodeSerializableValue(UnitHash.serializer(), value.unitHash)
             }
@@ -234,17 +252,17 @@ sealed class Request : ObyteMessage(),
         val asset: UnitHash? = null,
         @SerialName("spend_unconfirmed")
         val spendUnconfirmed: SpendUnconfirmed
-    ): Request()
+    ) : Request()
 
     @Serializable
     @SerialName("light/get_balances")
     data class GetBalances(
         val addresses: List<Address>
-    ): Request() {
+    ) : Request() {
         @Serializer(forClass = GetBalances::class)
-        companion object: KSerializer<GetBalances> {
+        companion object : KSerializer<GetBalances> {
             override fun serialize(encoder: Encoder, value: GetBalances) {
-                encoder.encodeSerializableValue(Address.serializer().list, value.addresses)
+                encoder.encodeSerializableValue(ListSerializer(Address.serializer()), value.addresses)
             }
         }
     }
@@ -283,7 +301,7 @@ sealed class Response : ObyteMessage(),
         @Serializer(forClass = GetWitnesses::class)
         companion object : KSerializer<GetWitnesses> {
             override fun deserialize(decoder: Decoder): GetWitnesses {
-                val witnesses = decoder.decodeSerializableValue(Address.serializer().list)
+                val witnesses = decoder.decodeSerializableValue(ListSerializer(Address.serializer()))
                 return GetWitnesses(witnesses)
             }
         }
@@ -338,9 +356,9 @@ sealed class Response : ObyteMessage(),
     data class PostJoint(
         val response: String,
         override var tag: String = ""
-    ): Response() {
+    ) : Response() {
         @Serializer(forClass = PostJoint::class)
-        companion object: KSerializer<PostJoint> {
+        companion object : KSerializer<PostJoint> {
             override fun deserialize(decoder: Decoder): PostJoint {
                 val response = decoder.decodeString()
                 return PostJoint(response)
@@ -353,7 +371,7 @@ sealed class Response : ObyteMessage(),
     data class GetJoint(
         val joint: Joint,
         override var tag: String = ""
-    ): Response()
+    ) : Response()
 
     @Serializable
     @SerialName("light/pick_divisible_coins_for_amount")
@@ -363,22 +381,23 @@ sealed class Response : ObyteMessage(),
         @SerialName("total_amount")
         val totalAmount: Long,
         override var tag: String = ""
-    ): Response()
+    ) : Response()
 
     @Serializable
     @SerialName("light/get_balances")
     data class GetBalances(
         val balances: Map<Address, Map<UnitHash, Balance>>,
         override var tag: String = ""
-    ): Response() {
+    ) : Response() {
         @Serializer(forClass = GetBalances::class)
-        companion object: KSerializer<GetBalances> {
+        companion object : KSerializer<GetBalances> {
             override fun deserialize(decoder: Decoder): GetBalances {
                 val balances = decoder.decodeSerializableValue(
                     MapSerializer(
                         Address.serializer(),
                         MapSerializer(UnitHash.serializer(), Balance.serializer())
-                    ))
+                    )
+                )
                 return GetBalances(balances)
             }
         }
@@ -389,8 +408,10 @@ sealed class Response : ObyteMessage(),
 enum class SpendUnconfirmed {
     @SerialName("all")
     ALL,
+
     @SerialName("own")
     OWN,
+
     @SerialName("none")
     NONE
 }

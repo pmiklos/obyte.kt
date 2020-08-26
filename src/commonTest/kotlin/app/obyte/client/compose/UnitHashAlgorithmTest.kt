@@ -2,6 +2,7 @@ package app.obyte.client.compose
 
 import app.obyte.client.protocol.*
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,8 +46,11 @@ class UnitHashAlgorithmTest {
             authors = listOf(
                 Author(
                     address = Address("DFVODTYGTS3ILVOQ5MFKJIERH6LGKELP"),
-                    authentifiers = json {
-                        "r" to JsonPrimitive("AmXwS+cmZrh0CFnQ9uaYsuXf1PEv4yVfvP87Ru//o1o5mtI3lT7YVGvy+g5r4Y45qtcBlN8p+0Lrl5ECZd3WIw==")
+                    authentifiers = buildJsonObject {
+                        put(
+                            "r",
+                            JsonPrimitive("AmXwS+cmZrh0CFnQ9uaYsuXf1PEv4yVfvP87Ru//o1o5mtI3lT7YVGvy+g5r4Y45qtcBlN8p+0Lrl5ECZd3WIw==")
+                        )
                     }
                 )
             ),

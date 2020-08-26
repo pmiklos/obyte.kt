@@ -6,10 +6,7 @@ import app.obyte.client.util.ripemd160
 import app.obyte.client.util.sha256
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonLiteral
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 
 internal class DefinitionHashAlgorithm {
 
@@ -40,7 +37,7 @@ internal class DefinitionHashAlgorithm {
                     stringify(components, element[key]!!)
                 }
             }
-            is JsonLiteral -> when {
+            is JsonPrimitive -> when {
                 element.isString -> {
                     components.add("s")
                     components.add(element.content)

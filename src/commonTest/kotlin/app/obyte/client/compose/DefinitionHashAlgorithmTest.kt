@@ -1,9 +1,7 @@
 package app.obyte.client.compose
 
 import app.obyte.client.configurePlatform
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.json
-import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,11 +17,11 @@ class DefinitionHashAlgorithmTest {
 
     @Test
     fun hashes() {
-        assertEquals("V6UTSDDH7TRP2FYZ7CHFSXDH2PTZYMAP", hasher.calculate(jsonArray {
-            +"sig"
-            +json {
-                "pubkey" to JsonPrimitive("12345678")
-            }
+        assertEquals("V6UTSDDH7TRP2FYZ7CHFSXDH2PTZYMAP", hasher.calculate(buildJsonArray {
+            add("sig")
+            add(buildJsonObject {
+                put("pubkey", JsonPrimitive("12345678"))
+            })
         }))
     }
 

@@ -30,7 +30,7 @@ class UnitHashAlgorithm(
             )
         }
 
-        val unitString = json.stringify(SortedSerializer(StrippedUnit.serializer()), strippedUnit)
+        val unitString = json.encodeToString(SortedSerializer(StrippedUnit.serializer()), strippedUnit)
         return UnitHash(unitString.sha256().encodeBase64())
     }
 
