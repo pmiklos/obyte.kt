@@ -36,7 +36,7 @@ class PayloadHashTest {
 
         assertEquals("""
             {"inputs":[{"message_index":0,"output_index":0,"unit":"eOiQa9tbgN0Jeq5iJ4YXAT6yjlU7bpUE6Kz8TAeQiG8="},{"from_main_chain_index":1424866,"to_main_chain_index":1424887,"type":"headers_commission"},{"from_main_chain_index":105479,"to_main_chain_index":105485,"type":"witnessing"}],"outputs":[{"address":"DFVODTYGTS3ILVOQ5MFKJIERH6LGKELP","amount":232}]}
-        """.trimIndent(), obyteJson.stringify(SortedSerializer(PaymentPayload.serializer()), payload))
+        """.trimIndent(), obyteJson.encodeToString(SortedSerializer(PaymentPayload.serializer()), payload))
 
         assertEquals("ZQfmdTThDicipdyXl4tOX6nTXxM67ckXRutx0lfjGLE=", payload.hash())
     }

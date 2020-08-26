@@ -6,9 +6,7 @@ import app.obyte.client.util.KeyPair
 import app.obyte.client.util.PrivateKey
 import app.obyte.client.util.keyPair
 import app.obyte.client.util.sha256
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.json
-import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.*
 import kotlin.random.Random
 
 class Wallet internal constructor(
@@ -16,11 +14,11 @@ class Wallet internal constructor(
     private val keyPair: KeyPair
 ) {
 
-    val addressDefinition = jsonArray {
-        +"sig"
-        +json {
-            "pubkey" to JsonPrimitive(keyPair.publicKey.encodeBase64())
-        }
+    val addressDefinition = buildJsonArray {
+        add("sig")
+        add(buildJsonObject {
+            put("pubkey", JsonPrimitive(keyPair.publicKey.encodeBase64()))
+        })
     }
     val address = Address(definitionHashAlgorithm.calculate(addressDefinition))
 

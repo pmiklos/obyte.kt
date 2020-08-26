@@ -9,8 +9,8 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 fun PaymentPayload.hash(): String =
-    obyteJson.stringify(SortedSerializer(PaymentPayload.serializer()), this).sha256().encodeBase64()
+    obyteJson.encodeToString(SortedSerializer(PaymentPayload.serializer()), this).sha256().encodeBase64()
 
 fun DataFeedPayload.hash(): String =
-    obyteJson.stringify(SortedSerializer(MapSerializer(String.serializer(), String.serializer())), this).sha256()
+    obyteJson.encodeToString(SortedSerializer(MapSerializer(String.serializer(), String.serializer())), this).sha256()
         .encodeBase64()

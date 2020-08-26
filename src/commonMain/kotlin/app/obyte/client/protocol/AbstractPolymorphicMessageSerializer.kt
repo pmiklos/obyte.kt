@@ -1,13 +1,14 @@
 package app.obyte.client.protocol
 
 import kotlinx.serialization.*
+import kotlinx.serialization.encoding.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
 abstract class AbstractPolymorphicMessageSerializer<T : Any> internal constructor(private val baseClass: KClass<T>) :
     KSerializer<T> {
     override fun serialize(encoder: Encoder, value: T) {
-        val polymorphic = encoder.context.getPolymorphic(baseClass, value)
+        val polymorphic = encoder.serializersModule.getPolymorphic(baseClass, value)
 
         encoder.encodeStructure(descriptor) {
             if (polymorphic != null) {
@@ -23,7 +24,7 @@ abstract class AbstractPolymorphicMessageSerializer<T : Any> internal constructo
 
     override fun deserialize(decoder: Decoder): T {
         return deserialize(decoder) { discriminator, index ->
-            val polymorphic = decoder.context.getPolymorphic(baseClass, discriminator)
+            val polymorphic = decoder.serializersModule.getPolymorphic(baseClass, discriminator)
             requireNotNull(polymorphic) { "Polymorphic type '$discriminator' not mapped" }
             decodeSerializableElement(descriptor, index, polymorphic as KSerializer<T>)
         }
@@ -37,7 +38,7 @@ abstract class AbstractPolymorphicMessageSerializer<T : Any> internal constructo
 
             loop@ while (true) {
                 when (val index = decodeElementIndex(descriptor)) {
-                    CompositeDecoder.READ_DONE -> break@loop
+                    CompositeDecoder.DECODE_DONE -> break@loop
                     0 -> discriminator = decodeStringElement(descriptor, index)
                     1 -> {
                         discriminator = requireNotNull(discriminator) {
@@ -58,9 +59,9 @@ abstract class AbstractPolymorphicMessageSerializer<T : Any> internal constructo
                 discriminator = requireNotNull(discriminator) {
                     "Missing type discriminator"
                 }
-                val polymorphic = context.getPolymorphic(baseClass, discriminator)
+                val polymorphic = serializersModule.getPolymorphic(baseClass, discriminator)
                 if (polymorphic != null) {
-                    value = decoder.decodeNullableSerializableValue(polymorphic)
+                    value = decoder.decodeNullableSerializableValue(polymorphic as DeserializationStrategy<T?>)
                 }
             }
 

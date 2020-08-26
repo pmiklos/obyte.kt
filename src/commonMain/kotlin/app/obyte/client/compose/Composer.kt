@@ -4,7 +4,9 @@ import app.obyte.client.ObyteException
 import app.obyte.client.protocol.*
 import app.obyte.client.util.encodeBase64
 import io.ktor.util.date.GMTDate
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.json
+import kotlinx.serialization.json.put
 
 private const val TYPICAL_PAYMENT_PAYLOAD_COMMISSION = 250
 
@@ -65,8 +67,8 @@ class Composer internal constructor(
         val contentHashToSign = unitContentHashAlgorithm.calculate(header, messages)
         val signature = wallet.sign(contentHashToSign)
         val signedAuthor = author.copy(
-            authentifiers = json {
-                "r" to signature.encodeBase64()
+            authentifiers = buildJsonObject {
+                put("r", signature.encodeBase64())
             }
         )
 

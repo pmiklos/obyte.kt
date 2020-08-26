@@ -25,7 +25,6 @@ import io.ktor.http.cio.websocket.readText
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.JsonException
 
 fun ObyteClient(
     block: HttpClientConfig<*>.() -> Unit = {}
@@ -120,7 +119,7 @@ suspend fun HttpClient.connect(
                     logger.log("INCOMING: $rawMsg")
 
                     try {
-                        when (val message = obyteJson.parse(ObyteMessageSerializer, rawMsg)) {
+                        when (val message = obyteJson.decodeFromString(ObyteMessageSerializer, rawMsg)) {
                             is Response -> responseChannel.send(message)
                             is JustSaying.UpgradeRequired -> {
                                 logger.log("Client library upgrade required")
@@ -132,8 +131,6 @@ suspend fun HttpClient.connect(
                                 obyteSessionConfiguration.emit(obyteRequestContext, message)
                             }
                         }
-                    } catch (e: JsonException) {
-                        logger.log("ERROR: ${e.message}")
                     } catch (e: SerializationException) {
                         logger.log("ERROR: ${e.message}")
                     } catch (e: Exception) {

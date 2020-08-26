@@ -2,23 +2,26 @@ package app.obyte.client.protocol
 
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.plus
 
-val obyteJson = Json(
-    JsonConfiguration.Stable.copy(
-        classDiscriminator = "app",
-        encodeDefaults = false
-    ), context = protocolModule + messageModule
-)
+val obyteJson = Json {
+    classDiscriminator = "app"
+    encodeDefaults = false
+    serializersModule = protocolModule + messageModule
+}
 
 object ObyteMessageSerializer : AbstractPolymorphicMessageSerializer<ObyteMessage>(
     ObyteMessage::class
 ) {
-    override val descriptor = SerialDescriptor("Message", StructureKind.LIST) {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor = buildSerialDescriptor("Message", StructureKind.LIST) {
         element("type", String.serializer().descriptor)
-        element("message", SerialDescriptor("Message", UnionKind.CONTEXTUAL))
+        element("message", buildSerialDescriptor("Message", SerialKind.CONTEXTUAL))
     }
 
     override fun serialize(encoder: Encoder, value: ObyteMessage) {
@@ -59,18 +62,20 @@ object ObyteMessageSerializer : AbstractPolymorphicMessageSerializer<ObyteMessag
 internal object JustSayingSerializer : AbstractPolymorphicMessageSerializer<JustSaying>(
     JustSaying::class
 ) {
-    override val descriptor = SerialDescriptor("justsaying", StructureKind.OBJECT) {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor = buildClassSerialDescriptor("justsaying") {
         element("subject", String.serializer().descriptor)
-        element("body", SerialDescriptor("JustSaying", UnionKind.CONTEXTUAL))
+        element("body", buildSerialDescriptor("JustSaying", SerialKind.CONTEXTUAL))
     }
 }
 
 internal object RequestSerializer : AbstractPolymorphicMessageSerializer<Request>(
     Request::class
 ) {
-    override val descriptor = SerialDescriptor("request", StructureKind.OBJECT) {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor = buildClassSerialDescriptor("request") {
         element("command", String.serializer().descriptor)
-        element("params", SerialDescriptor("Request", UnionKind.CONTEXTUAL))
+        element("params", buildSerialDescriptor("Request", SerialKind.CONTEXTUAL))
         element("tag", String.serializer().descriptor)
     }
 }
@@ -78,16 +83,16 @@ internal object RequestSerializer : AbstractPolymorphicMessageSerializer<Request
 internal object ResponseSerializer : AbstractPolymorphicMessageSerializer<Response>(
     Response::class
 ) {
-    override val descriptor = SerialDescriptor("response", StructureKind.OBJECT) {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor = buildClassSerialDescriptor("response") {
         element("command", String.serializer().descriptor)
-        element("response", SerialDescriptor("Response", UnionKind.CONTEXTUAL))
+        element("response", buildSerialDescriptor("Response", SerialKind.CONTEXTUAL))
         element("tag", String.serializer().descriptor)
     }
 }
 
 internal class EmptyBody<T : ObyteMessage>(serialName: String, private val instance: T) : KSerializer<T> {
-    @ImplicitReflectionSerializer
-    override val descriptor = SerialDescriptor(serialName)
+    override val descriptor = buildClassSerialDescriptor(serialName)
     override fun serialize(encoder: Encoder, value: T) {}
     override fun deserialize(decoder: Decoder) = instance
 }

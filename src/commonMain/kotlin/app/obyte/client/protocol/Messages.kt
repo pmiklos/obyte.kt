@@ -3,11 +3,12 @@ package app.obyte.client.protocol
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 
 internal val messageModule = SerializersModule {
     polymorphic(Message::class) {
-        Message.Payment::class with Message.Payment.serializer()
-        Message.DataFeed::class with Message.DataFeed.serializer()
+        subclass(Message.Payment::class, Message.Payment.serializer())
+        subclass(Message.DataFeed::class, Message.DataFeed.serializer())
     }
 }
 

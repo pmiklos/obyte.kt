@@ -4,21 +4,21 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.*
 
 internal class SortedSerializer<T : Any>(serializer: KSerializer<T>) :
-    JsonTransformingSerializer<T>(serializer, "sortedPayload") {
+    JsonTransformingSerializer<T>(serializer) {
 
-    override fun writeTransform(element: JsonElement): JsonElement = element.sorted()
+    override fun transformSerialize(element: JsonElement): JsonElement = element.sorted()
 
 }
 
 internal fun JsonElement.sorted(): JsonElement = when (this) {
-    is JsonObject -> json {
+    is JsonObject -> buildJsonObject {
         for (key in keys.sorted()) {
-            key to this@sorted[key]!!.sorted()
+            put(key, this@sorted[key]!!.sorted())
         }
     }
-    is JsonArray -> jsonArray {
+    is JsonArray -> buildJsonArray {
         this@sorted.forEach {
-            +it.sorted()
+            add(it.sorted())
         }
     }
     else -> this@sorted

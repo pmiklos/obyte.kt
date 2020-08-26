@@ -21,7 +21,7 @@ internal class ObyteConnection(
 ) {
 
     suspend fun send(message: ObyteMessage) {
-        val jsonMessage = json.stringify(ObyteMessageSerializer, message)
+        val jsonMessage = json.encodeToString(ObyteMessageSerializer, message)
         logger.log("OUTGOING: $jsonMessage")
         webSocketSession.send(Frame.Text(jsonMessage))
     }
