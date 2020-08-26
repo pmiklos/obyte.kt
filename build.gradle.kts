@@ -32,10 +32,10 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                api("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization_version")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
                 implementation("io.ktor:ktor-client-websockets:$ktor_version")
                 implementation("io.ktor:ktor-client-logging:$ktor_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization_version")
                 implementation(kotlin("stdlib-common"))
             }
         }
